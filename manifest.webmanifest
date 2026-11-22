@@ -1,6 +1,6 @@
 {
-  "name": "Tachar días",
-  "short_name": "Tachar días",
+  "name": "Un día a la vez",
+  "short_name": "Un día",
   "description": "Calendario para tachar días, con racha, meta y una memoria de audio por día.",
   "lang": "es-AR",
   "start_url": "./",

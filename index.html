@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#14161a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Tachar días</title>
+<title>Un día a la vez</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -14,40 +14,43 @@
 <style>
   :root{--bg:#14161a;--card:#1c1f25;--line:#2a2e36;--ink:#ecebe6;--mute:#8b8f98;--accent:#e8735a;--accent2:#f2b8a8;--ok:#7fb59a;--serif:Fraunces,Georgia,serif}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
-  body{padding:calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
-  .wrap{max-width:460px;margin:0 auto}
-  header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
-  #title{font-family:var(--serif);font-size:26px;font-weight:700;background:none;border:0;color:var(--ink);width:100%;padding:4px 0;outline:none}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;height:100%;overflow:hidden}
+  body{height:100vh;height:100dvh;padding:calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom))}
+  .wrap{max-width:460px;margin:0 auto;height:100%;display:flex;flex-direction:column;gap:10px;min-height:0}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none}
+  #title{font-family:var(--serif);font-size:24px;font-weight:700;background:none;border:0;color:var(--ink);width:100%;padding:4px 0;outline:none}
   #title:focus{border-bottom:1px dashed var(--line)}
   .gear{background:none;border:1px solid var(--line);color:var(--mute);border-radius:10px;width:40px;height:40px;font-size:18px;cursor:pointer;flex:none}
-  .stats{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
-  .ring{position:relative;width:104px;height:104px}
+  .stats{flex:none;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+  .ring{position:relative;width:88px;height:88px}
+  .ring svg{width:88px;height:88px}
   .ring svg{transform:rotate(-90deg)}
   .ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .ring .num b{font-family:var(--serif);font-size:32px;line-height:1}
+  .ring .num b{font-family:var(--serif);font-size:28px;line-height:1}
   .ring .num span{font-size:11px;color:var(--mute);margin-top:2px}
-  .meta div{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;color:var(--mute)}
+  .meta div{display:flex;justify-content:space-between;font-size:13px;padding:2px 0;color:var(--mute)}
   .meta div b{color:var(--ink);font-weight:600}
-  .msg{font-family:var(--serif);font-size:16px;color:var(--accent2);margin:6px 0 0;line-height:1.3}
-  .actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:14px}
-  .btn{padding:16px;border-radius:14px;border:0;background:var(--accent);color:#1a0f0b;font-weight:600;font-size:16px;cursor:pointer;font-family:inherit}
+  .quote{grid-column:1/-1;border-top:1px solid var(--line);padding-top:8px;margin:0}
+  .quote small{display:block;font-size:11px;color:var(--mute);letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
+  .quote p{font-family:var(--serif);font-size:15px;color:var(--accent2);margin:0;line-height:1.3}
+  .actions{flex:none;display:grid;grid-template-columns:1fr auto;gap:8px}
+  .btn{padding:13px;border-radius:14px;border:0;background:var(--accent);color:#1a0f0b;font-weight:600;font-size:16px;cursor:pointer;font-family:inherit}
   .btn:active{transform:scale(.98)}
   .btn.done{background:var(--card);color:var(--ok);border:1px solid var(--line)}
-  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:16px 18px}
-  .cal{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
-  .calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:13px 18px}
+  .cal{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 12px}
+  .calhead{flex:none;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
   .calhead h2{font-family:var(--serif);font-weight:500;font-size:19px;margin:0}
   .calhead button{background:none;border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:10px;font-size:16px;cursor:pointer}
-  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:auto repeat(6,minmax(0,1fr));gap:5px}
   .dow{font-size:11px;color:var(--mute);text-align:center;padding-bottom:4px}
-  .day{position:relative;aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;background:#22262d;border:1px solid transparent;cursor:pointer;user-select:none}
+  .day{position:relative;min-height:0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;background:#22262d;border:1px solid transparent;cursor:pointer;user-select:none}
   .day.empty{background:none;cursor:default}
   .day.future{color:#4a4f58;background:#1e2127}
   .day.before{color:#5a5f68}
   .day.today{border-color:var(--accent)}
   .day.start::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--ok)}
-  .day svg{position:absolute;inset:14%;width:72%;height:72%;pointer-events:none}
+  .day svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(72%,34px);height:min(72%,34px);pointer-events:none}
   .day svg path{stroke:var(--accent);stroke-width:3.2;stroke-linecap:round;fill:none;stroke-dasharray:40}
   .day.anim svg path{animation:draw .28s ease-out both}
   .day.anim svg path:nth-child(2){animation-delay:.14s}
@@ -56,7 +59,7 @@
   .day.goal{border:2px solid var(--ok);background:#1f2a25;color:var(--ok);font-weight:600}
   .day .flag{position:absolute;bottom:1px;right:3px;font-size:11px;line-height:1}
   .day .mic{position:absolute;bottom:3px;left:4px;width:6px;height:6px;border-radius:50%;background:var(--accent2)}
-  .legend{font-size:12px;color:var(--mute);margin-top:10px;text-align:center;line-height:1.6}
+  .legend{flex:none;font-size:11px;color:var(--mute);margin-top:6px;text-align:center;line-height:1.5}
   .link{background:none;border:0;color:var(--ok);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}
   .sheet{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:10}
   .sheet.open{display:flex}
@@ -83,18 +86,38 @@
   .note{font-size:12px;color:var(--mute);margin-top:8px}
   .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2a2e36;color:var(--ink);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:20}
   .toast.show{opacity:1}
+  @media (max-height:700px){.ring,.ring svg{width:72px;height:72px}.ring .num b{font-size:22px}.quote p{font-size:14px}#title{font-size:21px}.btn,.btn.ghost{padding:11px}}
+  .medals{grid-column:1/-1;display:flex;justify-content:space-between;gap:3px;padding-top:2px}
+  .medal{flex:1;max-width:32px;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;background:#22262d;color:#4a4f58;border:1.5px dashed #333842;cursor:pointer;padding:0;font-family:inherit}
+  .medal.on{border:0;color:#1a1410;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+  .celebrate{text-align:center}
+  .celebrate .big{width:110px;height:110px;border-radius:50%;margin:6px auto 14px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:40px;font-weight:700;color:#1a1410;animation:pop .6s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+  .breath{position:fixed;inset:0;background:var(--bg);z-index:30;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(20px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom))}
+  .breath.open{display:flex}
+  .breath h3{font-family:var(--serif);font-size:22px;margin:0}
+  .bstage{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+  .bcircle{width:240px;height:240px;border-radius:50%;background:radial-gradient(circle at 50% 45%,rgba(127,181,154,.55),rgba(127,181,154,.12) 70%);border:2px solid rgba(127,181,154,.5);transform:scale(.45);display:flex;align-items:center;justify-content:center;flex-direction:column}
+  .bcircle b{font-family:var(--serif);font-size:24px;font-weight:500;transform:none}
+  .bcircle span{font-size:28px;color:var(--mute);font-variant-numeric:tabular-nums}
+  .bopts{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:6px 0}
+  .bopts button{padding:9px 12px;border-radius:20px;border:1px solid var(--line);background:none;color:var(--mute);font-size:13px;cursor:pointer;font-family:inherit}
+  .bopts button.sel{border-color:var(--ok);color:var(--ok)}
+  .bfoot{width:100%;max-width:420px}
+  .bfoot .btn{width:100%}
+  .bsub{color:var(--mute);font-size:13px;text-align:center;margin:4px 0 10px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <input id="title" value="Días de distancia" aria-label="Título" maxlength="40">
+    <input id="title" value="Un día a la vez" aria-label="Título" maxlength="40">
     <button class="gear" id="openSet" aria-label="Ajustes">⚙</button>
   </header>
 
   <section class="stats">
     <div class="ring">
-      <svg width="104" height="104" viewBox="0 0 104 104">
+      <svg viewBox="0 0 104 104">
         <circle cx="52" cy="52" r="44" stroke="#2a2e36" stroke-width="9" fill="none"/>
         <circle id="arc" cx="52" cy="52" r="44" stroke="#e8735a" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5" style="transition:stroke-dashoffset .5s"/>
       </svg>
@@ -102,16 +125,18 @@
     </div>
     <div class="meta">
       <div>Tachados <b id="total">0</b></div>
-      <div>Meta <b id="goalTxt">30 días</b></div>
-      <div>Faltan <b id="left">30</b></div>
+      <div>Meta <b id="goalTxt">90 días</b></div>
+      <div>Faltan <b id="left">90</b></div>
       <div>Día final <b id="endTxt">—</b></div>
-      <p class="msg" id="msg"></p>
     </div>
+    <div class="quote"><small id="qDay">Día 1</small><p id="msg"></p></div>
+    <div class="medals" id="medals"></div>
   </section>
 
-  <div class="actions">
+  <div class="actions" style="grid-template-columns:1fr auto auto">
     <button class="btn" id="todayBtn">Tachar hoy</button>
     <button class="btn ghost" id="todayMemo" aria-label="Memoria de hoy">🎙</button>
+    <button class="btn ghost" id="openBreath" aria-label="Respirar">🌬</button>
   </div>
 
   <section class="cal">
@@ -121,7 +146,7 @@
       <button id="next" aria-label="Mes siguiente">›</button>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="legend">Tocá un día para tacharlo o grabar su memoria<br>● inicio · <span style="color:var(--accent2)">●</span> tiene audio · 🏁 día final · <button class="link" id="jumpEnd">ir al día final</button></div>
+    <div class="legend">● inicio · <span style="color:var(--accent2)">●</span> audio · 🏁 final · <button class="link" id="jumpEnd">ir al final</button></div>
   </section>
 </div>
 
@@ -159,6 +184,28 @@
     <div class="row"><button class="danger" id="resetBtn">Borrar todos los tachados</button></div>
   </div>
 </div>
+<div class="sheet" id="medalSheet">
+  <div class="panel celebrate">
+    <div class="big" id="mBig">7</div>
+    <h3 id="mName"></h3>
+    <p class="sub" id="mSub"></p>
+    <div class="row"><button class="primary" id="mClose">Seguir</button></div>
+  </div>
+</div>
+
+<div class="breath" id="breath">
+  <div style="text-align:center">
+    <h3>Respirar</h3>
+    <p class="bsub" id="bDesc">Elegí un ritmo y un tiempo</p>
+    <div class="bopts" id="bPat"></div>
+    <div class="bopts" id="bDur"></div>
+  </div>
+  <div class="bstage"><div style="position:relative;width:240px;height:240px"><div class="bcircle" id="bCircle"></div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><b id="bPhase" style="font-family:var(--serif);font-size:24px;font-weight:500">Listo</b><span id="bCount" style="font-size:28px;color:var(--mute);font-variant-numeric:tabular-nums"></span></div></div></div>
+  <div class="bfoot">
+    <p class="bsub" id="bLeft"></p>
+    <div class="row" style="margin-top:0"><button id="bClose">Cerrar</button><button class="primary" id="bStart">Empezar</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -168,8 +215,107 @@ const parse=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
 const todayK=()=>key(new Date());
 const $=id=>document.getElementById(id);
 const LS='tachar-dias-v1';
+const FRASES=[
+"Hoy no hace falta ganar. Alcanza con no volver atrás.",
+"Lo que duele también está acomodando cosas.",
+"No es debilidad extrañar. Es fortaleza no escribir.",
+"Un día. Solo este. Mañana es otro trabajo.",
+"La distancia no es castigo: es espacio para volver a vos.",
+"Respirá. Lo que sentís hoy no es lo que vas a sentir siempre.",
+"Una semana casi. Tu cabeza ya está aprendiendo el camino nuevo.",
+"No tenés que entenderlo todo para empezar a soltarlo.",
+"Cada día tachado es una decisión que cumpliste.",
+"Diez días. Esto ya no es impulso, es elección.",
+"El silencio también es una respuesta, y es la tuya.",
+"Dejá de buscar señales. La señal sos vos eligiendo tu paz.",
+"Lo que no fue, también te enseñó qué querés.",
+"Si hoy cuesta, hacé lo mínimo. Lo mínimo también suma.",
+"Medio mes. Mirá atrás: ya no sos el del día uno.",
+"No te pongas fecha para estar bien. Ponete días para estar mejor.",
+"Mover el cuerpo ordena la cabeza. Hoy, un poco de movimiento.",
+"Tu energía es finita: ponela donde te devuelve algo.",
+"Extrañar es un recuerdo pasando. Dejalo pasar.",
+"Construí algo hoy, aunque sea chico.",
+"Tres semanas. El hábito ya tiene raíces.",
+"No necesitás cierre de nadie. El cierre lo das vos.",
+"Hay gente que te quiere bien. Escribile a uno hoy.",
+"La versión tuya que viene te va a agradecer esto.",
+"No es olvidarla. Es dejar de esperarla.",
+"Los días buenos llegan sin avisar. Estate presente.",
+"Tu valor no depende de quién te eligió.",
+"Hoy hacé algo solo por gusto. Sin razón.",
+"Un día flojo no borra veintiocho firmes.",
+"Un mes. Lo que parecía imposible ya es tu rutina.",
+"Ahora que el ruido baja, escuchá qué querés vos.",
+"La paz no es aburrida. Es el piso donde se construye.",
+"Dormí bien hoy. Descansar también es avanzar.",
+"Las cosas importantes se hacen de a ladrillo.",
+"No vuelvas a abrir la puerta solo para ver si sigue ahí.",
+"Lo que sembrás en silencio crece igual.",
+"Hoy, una hora para tu proyecto. Solo una.",
+"Aprendiste a estar con vos. Eso no te lo quita nadie.",
+"Si aparece la tentación, mirá esta racha.",
+"Cuarenta días. Ya no estás sosteniendo: estás caminando.",
+"La gratitud cambia el foco. Anotá tres cosas buenas de hoy.",
+"Estar solo no es estar vacío.",
+"Lo que querés para tu vida no entra en lo que te dolía.",
+"Hoy elegí la versión tuya que admirás.",
+"Mes y medio. El que empezó esto estaría orgulloso.",
+"Las heridas cierran desde adentro hacia afuera. Paciencia.",
+"No compitas con nadie. Competí con tu día uno.",
+"Abrí espacio: lo nuevo necesita lugar.",
+"La disciplina es acordarte de lo que querés cuando no tenés ganas.",
+"Cincuenta. Medio camino hecho, y el más difícil.",
+"Salí, mirá la ciudad, dejate sorprender.",
+"Tu historia no se define por un capítulo.",
+"Hoy cuidá tu cuerpo como si fuera tu obra más importante.",
+"Las ganas vuelven. Siempre vuelven.",
+"Hablá bien de vos, incluso en tu cabeza.",
+"Lo que soltás te deja las manos libres.",
+"Cada día igual de firme es un cimiento más profundo.",
+"No esperes estar listo. Empezá y te vas poniendo listo.",
+"Mirá cuánto avanzaste sin darte cuenta.",
+"Dos meses. Esto ya es parte de quién sos.",
+"Hoy hacé un plan con alguien. La conexión cura.",
+"Tu atención es tu tesoro. Ponela en lo que construís.",
+"No hace falta que nadie lo vea. Vos lo sabés.",
+"Lo que vale la pena llega a quien está bien parado.",
+"Sesenta y cinco. Firme, tranquilo, presente.",
+"Recordá por qué empezaste. Y mirá lo lejos que estás.",
+"Hoy probá algo que nunca hiciste.",
+"Ser fiel a vos mismo es la relación más larga que vas a tener.",
+"La calma que tenés hoy, la ganaste día por día.",
+"Setenta días. Ya no es esfuerzo: es identidad.",
+"Volvé a soñar en grande. Hay lugar.",
+"Lo que fue amor sigue siendo tuyo: la capacidad de sentir.",
+"Preparate para lo bueno: ya hiciste lugar.",
+"Hoy reconocete algo. En voz alta, si te animás.",
+"Setenta y cinco. Quince días y lo cerrás.",
+"Las cosas grandes se ven recién al final. Seguí.",
+"Tu futuro no tiene su nombre. Tiene el tuyo.",
+"Ya no buscás afuera lo que encontraste adentro.",
+"Cada día que pasa, la vuelta atrás queda más lejos.",
+"Ochenta. Mirá el anillo: casi completo.",
+"Hoy agradecé al que fuiste en el día uno.",
+"Lo que viene merece a esta versión tuya.",
+"Terminá fuerte. Cada día cuenta igual que el primero.",
+"Te volviste alguien que cumple lo que se promete.",
+"Faltan cinco. Disfrutá el tramo final.",
+"Mirá todo lo que construiste mientras dolía.",
+"La meta ya está a la vista. Caminá tranquilo.",
+"Mañana es el penúltimo. Hoy, simplemente, sumá.",
+"Un día más y cerrás el círculo.",
+"Noventa días. No soltaste a alguien: te encontraste a vos."
+];
+const MEDALLAS=[
+ {d:3,n:'Primer paso',c:'#b87333'},{d:7,n:'Una semana',c:'#b87333'},{d:10,n:'Diez firmes',c:'#b87333'},
+ {d:15,n:'Medio mes',c:'#b9bec7'},{d:21,n:'Hábito',c:'#b9bec7'},{d:30,n:'Un mes',c:'#b9bec7'},
+ {d:45,n:'Mes y medio',c:'#e5c158'},{d:60,n:'Dos meses',c:'#e5c158'},{d:75,n:'Recta final',c:'#e5c158'},
+ {d:90,n:'Libre',c:'#7fb59a'}
+];
 
-let state={title:'Días de distancia',start:todayK(),goal:30,marked:[]};
+
+let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[]};
 let audioDays=new Set();
 let view=new Date(); view.setDate(1);
 let lastAnim=null, curDay=null;
@@ -179,9 +325,12 @@ function load(){try{const o=JSON.parse(localStorage.getItem(LS)||'null');if(o)me
 function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('No se pudo guardar')}}
 function merge(o){
   if(!o||typeof o!=='object')return;
-  if(typeof o.title==='string')state.title=o.title;
+  if(typeof o.title==='string'&&o.title!=='Días de distancia')state.title=o.title;
+  if(Array.isArray(o.medals))state.medals=o.medals.filter(n=>typeof n==='number');
   if(typeof o.start==='string')state.start=o.start;
   if(Number(o.goal)>0)state.goal=Number(o.goal);
+  if(o.goalSet===true)state.goalSet=true;
+  if(!state.goalSet&&state.goal===30)state.goal=90;
   if(Array.isArray(o.marked))state.marked=o.marked.filter(x=>typeof x==='string').sort();
 }
 
@@ -203,7 +352,11 @@ function endDay(){
   while(set.has(key(d)))d.setDate(d.getDate()-1);
   d.setDate(d.getDate()+state.goal);return d;
 }
+function dayNum(){const n=Math.floor((parse(todayK())-parse(state.start))/864e5)+1;return Math.max(1,n)}
 function message(s,g){
+  const n=dayNum();return {n,t:FRASES[(n-1)%FRASES.length]};
+}
+function _oldMessage(s,g){
   if(s===0)return 'Un día a la vez. Hoy cuenta.';
   if(s>=g)return '¡Meta cumplida! Mirá todo lo que sostuviste.';
   if(s<3)return 'Empezaste. Lo más difícil ya pasó.';
@@ -217,11 +370,12 @@ const fmtLong=k=>cap(parse(k).toLocaleDateString('es-AR',{weekday:'long',day:'nu
 
 function render(){
   $('title').value=state.title;
+  renderMedals();
   const s=streak(),g=state.goal;
   $('streak').textContent=s;$('total').textContent=state.marked.length;
   $('goalTxt').textContent=g+' días';$('left').textContent=Math.max(0,g-s);
   $('arc').style.strokeDashoffset=276.5*(1-Math.min(1,s/g));
-  $('msg').textContent=message(s,g);
+  const q=message(s,g);$('msg').textContent=q.t;$('qDay').textContent='Día '+q.n+(q.n>90?'':' de 90');
   const endK=key(endDay());
   $('endTxt').textContent=parse(endK).toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
   const tk=todayK(),done=state.marked.includes(tk);
@@ -247,10 +401,37 @@ function render(){
   }
   lastAnim=null;
 }
+function bestStreak(){
+  const a=[...state.marked].sort();let best=0,run=0,prev=null;
+  for(const k of a){if(prev){const p=parse(prev);p.setDate(p.getDate()+1);run=(key(p)===k)?run+1:1}else run=1;best=Math.max(best,run);prev=k}
+  return best;
+}
+function checkMedals(celebrate){
+  const b=Math.max(bestStreak(),streak());const nuevas=[];
+  MEDALLAS.forEach(m=>{if(b>=m.d&&!state.medals.includes(m.d)){state.medals.push(m.d);nuevas.push(m)}});
+  if(nuevas.length){save();if(celebrate)showMedal(nuevas[nuevas.length-1])}
+}
+function showMedal(m){
+  $('mBig').textContent=m.d;$('mBig').style.background=m.c;
+  $('mName').textContent='Medalla: '+m.n;
+  const nx=MEDALLAS.find(x=>x.d>m.d);
+  $('mSub').textContent=m.d+' días seguidos.'+(nx?' Próxima: '+nx.d+' días.':' Completaste el camino.');
+  $('medalSheet').classList.add('open');try{navigator.vibrate&&navigator.vibrate([30,60,30])}catch(e){}
+}
+$('mClose').onclick=()=>$('medalSheet').classList.remove('open');
+function renderMedals(){
+  const c=$('medals');c.innerHTML='';const s=streak();
+  MEDALLAS.forEach(m=>{
+    const on=state.medals.includes(m.d);const b=document.createElement('button');
+    b.className='medal'+(on?' on':'');b.textContent=m.d;if(on)b.style.background=m.c;
+    b.onclick=()=>toast(on?(m.n+' · '+m.d+' días ✓'):(m.n+' · faltan '+Math.max(0,m.d-s)+' días'));
+    c.appendChild(b);
+  });
+}
 function toggle(k){
   const i=state.marked.indexOf(k);
   if(i>=0)state.marked.splice(i,1);else{state.marked.push(k);lastAnim=k;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}}
-  state.marked.sort();save();render();
+  state.marked.sort();save();checkMedals(true);render();
 }
 
 /* ---- hoja del día + grabación ---- */
@@ -312,11 +493,11 @@ $('todayMemo').onclick=()=>openDay(todayK());
 $('jumpEnd').onclick=()=>{const e=endDay();view=new Date(e.getFullYear(),e.getMonth(),1);render()};
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
-$('title').onchange=e=>{state.title=e.target.value.trim()||'Días de distancia';save();render()};
+$('title').onchange=e=>{state.title=e.target.value.trim()||'Un día a la vez';save();render()};
 $('openSet').onclick=()=>{$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='Borrar todos los tachados';$('setSheet').classList.add('open')};
 $('closeSet').onclick=()=>$('setSheet').classList.remove('open');
 $('setSheet').onclick=e=>{if(e.target.id==='setSheet')$('setSheet').classList.remove('open')};
-$('saveSet').onclick=()=>{if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0)state.goal=g;save();render();$('setSheet').classList.remove('open')};
+$('saveSet').onclick=()=>{if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0){state.goal=g;state.goalSet=true}save();render();$('setSheet').classList.remove('open')};
 $('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}state.marked=[];save();render();$('setSheet').classList.remove('open')};
 $('exportBtn').onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
@@ -326,8 +507,52 @@ $('exportBtn').onclick=()=>{
 $('importBtn').onclick=()=>$('importIn').click();
 $('importIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{merge(JSON.parse(await f.text()));save();render();toast('Respaldo importado')}catch(err){toast('Archivo inválido')}e.target.value=''};
 
+/* ---- respiración ---- */
+const PATRONES=[
+ {id:'calma',n:'Calma 4-6',d:'Inhalá 4, exhalá 6. Baja la ansiedad.',f:[['Inhalá',4,1],['Exhalá',6,0]]},
+ {id:'caja',n:'Caja 4-4-4-4',d:'Ritmo parejo para ordenar la cabeza.',f:[['Inhalá',4,1],['Sostené',4,1],['Exhalá',4,0],['Sostené',4,0]]},
+ {id:'478',n:'4-7-8',d:'Para relajarte o dormir.',f:[['Inhalá',4,1],['Sostené',7,1],['Exhalá',8,0]]}
+];
+const DURS=[1,3,5];
+let bPat=PATRONES[0],bMin=3,bRun=null;
+function bOpts(){
+  $('bPat').innerHTML='';PATRONES.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;if(p===bPat)b.className='sel';b.onclick=()=>{if(bRun)return;bPat=p;bOpts()};$('bPat').appendChild(b)});
+  $('bDur').innerHTML='';DURS.forEach(m=>{const b=document.createElement('button');b.textContent=m+' min';if(m===bMin)b.className='sel';b.onclick=()=>{if(bRun)return;bMin=m;bOpts()};$('bDur').appendChild(b)});
+  $('bDesc').textContent=bPat.d;
+}
+function bStop(done){
+  if(bRun){clearTimeout(bRun.t);clearInterval(bRun.i)}bRun=null;
+  const c=$('bCircle');c.style.transition='transform .8s ease';c.style.transform='scale(.45)';
+  $('bPhase').textContent=done?'Bien hecho':'Listo';$('bCount').textContent='';$('bLeft').textContent='';
+  $('bStart').textContent='Empezar';
+  if(done){toast('Respiración completa 🌿');try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
+}
+function bStart(){
+  if(bRun){bStop(false);return}
+  const end=Date.now()+bMin*60000;let idx=0;bRun={};
+  $('bStart').textContent='Parar';
+  const c=$('bCircle');
+  const step=()=>{
+    if(!bRun)return;
+    if(Date.now()>=end&&idx%bPat.f.length===0){bStop(true);return}
+    const [name,sec,big]=bPat.f[idx%bPat.f.length];
+    $('bPhase').textContent=name;
+    c.style.transition=name==='Sostené'?'none':'transform '+sec+'s ease-in-out';
+    c.style.transform=big?'scale(1)':'scale(.45)';
+    try{navigator.vibrate&&navigator.vibrate(20)}catch(e){}
+    let left=sec;$('bCount').textContent=left;
+    clearInterval(bRun.i);bRun.i=setInterval(()=>{left--;if(left>0)$('bCount').textContent=left;const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent=r>0?('Quedan '+fmtT(r)):'Terminando el ciclo…'},1000);
+    const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent='Quedan '+fmtT(r);
+    idx++;bRun.t=setTimeout(step,sec*1000);
+  };
+  step();
+}
+$('openBreath').onclick=()=>{bOpts();bStop(false);$('breath').classList.add('open')};
+$('bClose').onclick=()=>{bStop(false);$('breath').classList.remove('open')};
+$('bStart').onclick=bStart;
+
 /* ---- init ---- */
-load();render();
+load();checkMedals(false);render();
 (async()=>{try{idb=await openDB();(await memoKeys()||[]).forEach(k=>audioDays.add(k));render()}catch(e){}})();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 let lastDay=todayK();
