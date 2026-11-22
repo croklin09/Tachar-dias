@@ -115,12 +115,25 @@
   .emogrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
   .emogrid button{font-size:28px;padding:10px 0;border-radius:12px;border:1px solid var(--line);background:#14161a;cursor:pointer}
   .emogrid button.sel{border-color:var(--accent);background:#2a1e1a}
+  .sosbtn{flex:none;height:40px;padding:0 12px;border-radius:10px;border:1px solid #5a2a2a;background:#2a1717;color:#ff8f7a;font-weight:700;font-size:13px;letter-spacing:.06em;cursor:pointer;font-family:inherit}
+  .sos{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#2a1a17,#14161a 70%);z-index:35;display:none;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom))}
+  .sos.open{display:flex}
+  .sos .k{font-size:12px;color:var(--mute);letter-spacing:.12em;text-transform:uppercase}
+  .sos .n{font-family:var(--serif);font-size:84px;font-weight:700;line-height:1;color:var(--accent);margin:10px 0 4px}
+  .sos h2{font-family:var(--serif);font-weight:500;font-size:24px;margin:6px 0 0;line-height:1.25}
+  .sos .q{font-family:var(--serif);color:var(--accent2);font-size:17px;line-height:1.35;max-width:340px;margin:0 auto}
+  .sos .stack{width:100%;max-width:400px;display:flex;flex-direction:column;gap:8px}
+  .sos .stack button{width:100%}
+  .sosaudio{background:#1c1f25;border:1px solid var(--line);border-radius:14px;padding:12px;width:100%;max-width:400px}
+  .sosaudio p{margin:0 0 6px;font-size:13px;color:var(--mute)}
+  .sosaudio audio{margin-top:0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <input id="title" value="Un día a la vez" aria-label="Título" maxlength="40">
+    <button class="sosbtn" id="openSos" aria-label="SOS">SOS</button>
     <button class="gear" id="openSet" aria-label="Ajustes">⚙</button>
   </header>
 
@@ -189,6 +202,16 @@
     <label for="goalIn">Meta (días)</label>
     <input type="number" id="goalIn" min="1" max="999" inputmode="numeric">
     <div class="row"><button id="closeSet">Cancelar</button><button class="primary" id="saveSet">Guardar</button></div>
+    <div class="memo" style="margin-top:14px">
+      <h4>Audio SOS</h4>
+      <p class="note" style="margin:0 0 10px">Un mensaje tuyo para escuchar cuando tengas ganas de escribirle. Hablale a tu yo de ese momento.</p>
+      <div class="rec">
+        <button class="recbtn" id="sosRec" aria-label="Grabar audio SOS"><i></i></button>
+        <div class="rectxt" id="sosTxt"><b>0:00</b>Tocá para grabar (máx. 2 min)</div>
+      </div>
+      <audio id="sosPlayer" controls hidden></audio>
+      <div class="row" id="sosActions" hidden><button class="danger" id="sosDel">Borrar audio SOS</button></div>
+    </div>
     <div class="row"><button id="exportBtn">Exportar respaldo</button><button id="importBtn">Importar</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">Borrar todos los tachados</button></div>
@@ -209,6 +232,24 @@
     <h3 id="mName"></h3>
     <p class="sub" id="mSub"></p>
     <div class="row"><button class="primary" id="mClose">Seguir</button></div>
+  </div>
+</div>
+
+<div class="sos" id="sos">
+  <div>
+    <div class="k">Pará un segundo</div>
+    <div class="n" id="sosN">0</div>
+    <div class="k" id="sosNl">días de racha</div>
+    <h2>¿Vale la pena empezar de cero?</h2>
+  </div>
+  <div class="sosaudio" id="sosBox">
+    <p id="sosLabel">Tu mensaje para este momento</p>
+    <audio id="sosPlay" controls></audio>
+  </div>
+  <p class="q" id="sosQ"></p>
+  <div class="stack">
+    <button class="btn" id="sosBreath">Respirar 2 minutos</button>
+    <button class="btn ghost" id="sosOk">Ya pasó, sigo firme</button>
   </div>
 </div>
 
@@ -550,9 +591,9 @@ $('jumpEnd').onclick=()=>{const e=endDay();view=new Date(e.getFullYear(),e.getMo
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
 $('title').onchange=e=>{state.title=e.target.value.trim()||'Un día a la vez';save();render()};
-$('openSet').onclick=()=>{$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='Borrar todos los tachados';$('setSheet').classList.add('open')};
-$('closeSet').onclick=()=>$('setSheet').classList.remove('open');
-$('setSheet').onclick=e=>{if(e.target.id==='setSheet')$('setSheet').classList.remove('open')};
+$('openSet').onclick=()=>{renderSosSettings();$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='Borrar todos los tachados';$('setSheet').classList.add('open')};
+$('closeSet').onclick=()=>{sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')};
+$('setSheet').onclick=e=>{if(e.target.id==='setSheet'){sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')}};
 $('saveSet').onclick=()=>{if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0){state.goal=g;state.goalSet=true}save();render();$('setSheet').classList.remove('open')};
 $('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}state.marked=[];save();render();$('setSheet').classList.remove('open')};
 $('exportBtn').onclick=()=>{
@@ -562,6 +603,49 @@ $('exportBtn').onclick=()=>{
 };
 $('importBtn').onclick=()=>$('importIn').click();
 $('importIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{merge(JSON.parse(await f.text()));save();render();toast('Respaldo importado')}catch(err){toast('Archivo inválido')}e.target.value=''};
+
+/* ---- SOS ---- */
+const SOSK='__sos__';
+let sosURL=null,sosPlayURL=null,sRec=null,sChunks=[],sStart=0,sTimer=null,sStream=null;
+async function renderSosSettings(){
+  const p=$('sosPlayer');if(sosURL){URL.revokeObjectURL(sosURL);sosURL=null}
+  let m=null;try{if(idb)m=await getMemo(SOSK)}catch(e){}
+  if(m&&m.blob){sosURL=URL.createObjectURL(m.blob);p.src=sosURL;p.hidden=false;$('sosActions').hidden=false;$('sosTxt').innerHTML='<b>'+fmtT(m.dur||0)+'</b>Grabar de nuevo lo reemplaza'}
+  else{p.removeAttribute('src');p.hidden=true;$('sosActions').hidden=true;$('sosTxt').innerHTML='<b>0:00</b>Tocá para grabar (máx. 2 min)'}
+}
+async function sosStart(){
+  if(!idb){toast('Este navegador no permite guardar audios');return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Grabación no disponible');return}
+  try{sStream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('Necesito permiso de micrófono');return}
+  const type=pickType();
+  try{sRec=type?new MediaRecorder(sStream,{mimeType:type}):new MediaRecorder(sStream)}catch(e){sRec=new MediaRecorder(sStream)}
+  sChunks=[];
+  sRec.ondataavailable=e=>{if(e.data&&e.data.size)sChunks.push(e.data)};
+  sRec.onstop=async()=>{
+    clearInterval(sTimer);sStream.getTracks().forEach(t=>t.stop());$('sosRec').classList.remove('on');
+    const dur=(Date.now()-sStart)/1000;
+    if(!sChunks.length||dur<0.5){toast('Grabación muy corta');renderSosSettings();return}
+    try{await putMemo(SOSK,{blob:new Blob(sChunks,{type:sRec.mimeType||type||'audio/webm'}),dur,at:Date.now()});toast('Audio SOS guardado');renderSosSettings()}catch(e){toast('No se pudo guardar')}
+  };
+  sRec.start(250);sStart=Date.now();$('sosRec').classList.add('on');$('sosPlayer').pause();
+  sTimer=setInterval(()=>{const t=(Date.now()-sStart)/1000;$('sosTxt').innerHTML='<b>'+fmtT(t)+'</b>Grabando… tocá para parar';if(t>=MAX)sosStop()},250);
+}
+function sosStop(){if(sRec&&sRec.state==='recording')sRec.stop()}
+$('sosRec').onclick=()=>{if(sRec&&sRec.state==='recording')sosStop();else sosStart()};
+$('sosDel').onclick=async e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}b.dataset.c='';b.textContent='Borrar audio SOS';try{await delMemo(SOSK);renderSosSettings();toast('Audio SOS borrado')}catch(err){}};
+async function openSos(){
+  const n=streak();$('sosN').textContent=n;$('sosNl').textContent=n===1?'día de racha':'días de racha';
+  $('sosQ').textContent=FRASES[(dayNum()-1)%FRASES.length];
+  const a=$('sosPlay');if(sosPlayURL){URL.revokeObjectURL(sosPlayURL);sosPlayURL=null}
+  let m=null;try{if(idb)m=await getMemo(SOSK)}catch(e){}
+  $('sos').classList.add('open');try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
+  if(m&&m.blob){sosPlayURL=URL.createObjectURL(m.blob);a.src=sosPlayURL;a.hidden=false;$('sosLabel').textContent='Tu mensaje para este momento';try{await a.play()}catch(e){}}
+  else{a.hidden=true;a.removeAttribute('src');$('sosLabel').textContent='Todavía no grabaste tu audio SOS. Hacelo en ⚙ cuando estés tranquilo.'}
+}
+function closeSos(){$('sosPlay').pause();$('sos').classList.remove('open')}
+$('openSos').onclick=openSos;
+$('sosOk').onclick=()=>{closeSos();toast('Bien ahí. Racha intacta 💪')};
+$('sosBreath').onclick=()=>{closeSos();bMin=2;bOpts();bStop(false);$('breath').classList.add('open');bStart()};
 
 /* ---- respiración ---- */
 const PATRONES=[
@@ -617,13 +701,13 @@ function bStart(){
   };
   step();
 }
-$('openBreath').onclick=()=>{bOpts();bStop(false);$('breath').classList.add('open')};
+$('openBreath').onclick=()=>{bMin=10;bOpts();bStop(false);$('breath').classList.add('open')};
 $('bClose').onclick=()=>{bStop(false);$('breath').classList.remove('open')};
 $('bStart').onclick=bStart;
 
 /* ---- init ---- */
 load();checkMedals(false);render();
-(async()=>{try{idb=await openDB();(await memoKeys()||[]).forEach(k=>audioDays.add(k));render()}catch(e){}})();
+(async()=>{try{idb=await openDB();(await memoKeys()||[]).forEach(k=>{if(!String(k).startsWith('__'))audioDays.add(k)});render()}catch(e){}})();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 let lastDay=todayK();
 setInterval(()=>{if(todayK()!==lastDay){lastDay=todayK();render()}},60000);
