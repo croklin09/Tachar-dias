@@ -106,6 +106,15 @@
   .bfoot{width:100%;max-width:420px}
   .bfoot .btn{width:100%}
   .bsub{color:var(--mute);font-size:13px;text-align:center;margin:4px 0 10px}
+  .day{-webkit-touch-callout:none;-webkit-user-select:none}
+  .day .emo{position:absolute;top:1px;left:3px;font-size:12px;line-height:1}
+  .day .fit{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:40%;height:3px;border-radius:2px;background:var(--ok)}
+  .day.press{transform:scale(.92);transition:transform .15s}
+  .btn.fit{padding:13px 12px;font-size:15px}
+  .btn.fit.on{background:#1f2a25;color:var(--ok);border-color:#2f4a3c}
+  .emogrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
+  .emogrid button{font-size:28px;padding:10px 0;border-radius:12px;border:1px solid var(--line);background:#14161a;cursor:pointer}
+  .emogrid button.sel{border-color:var(--accent);background:#2a1e1a}
 </style>
 </head>
 <body>
@@ -133,8 +142,9 @@
     <div class="medals" id="medals"></div>
   </section>
 
-  <div class="actions" style="grid-template-columns:1fr auto auto">
+  <div class="actions" style="grid-template-columns:1fr auto auto auto">
     <button class="btn" id="todayBtn">Tachar hoy</button>
+    <button class="btn ghost fit" id="fitBtn" aria-label="Entrené hoy">💪 <span id="fitN">0</span></button>
     <button class="btn ghost" id="todayMemo" aria-label="Memoria de hoy">🎙</button>
     <button class="btn ghost" id="openBreath" aria-label="Respirar">🌬</button>
   </div>
@@ -146,7 +156,7 @@
       <button id="next" aria-label="Mes siguiente">›</button>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="legend">● inicio · <span style="color:var(--accent2)">●</span> audio · 🏁 final · <button class="link" id="jumpEnd">ir al final</button></div>
+    <div class="legend">Mantené apretado un día para reaccionar<br>● inicio · <span style="color:var(--accent2)">●</span> audio · <span style="color:var(--ok)">▬</span> entreno · 🏁 final · <button class="link" id="jumpEnd">ir al final</button></div>
   </section>
 </div>
 
@@ -155,7 +165,7 @@
   <div class="panel">
     <h3 id="dayTitle"></h3>
     <p class="sub" id="daySub"></p>
-    <div class="row" style="margin-top:0"><button class="primary" id="dayToggle"></button></div>
+    <div class="row" style="margin-top:0"><button class="primary" id="dayToggle"></button><button id="dayFit"></button></div>
     <div class="memo">
       <h4>Memoria del día</h4>
       <div class="rec">
@@ -184,6 +194,15 @@
     <div class="row"><button class="danger" id="resetBtn">Borrar todos los tachados</button></div>
   </div>
 </div>
+<div class="sheet" id="emoSheet">
+  <div class="panel">
+    <h3 id="emoTitle">¿Cómo fue el día?</h3>
+    <p class="sub" id="emoSub"></p>
+    <div class="emogrid" id="emoGrid"></div>
+    <div class="row"><button id="emoClear">Quitar</button><button id="emoClose">Cerrar</button></div>
+  </div>
+</div>
+
 <div class="sheet" id="medalSheet">
   <div class="panel celebrate">
     <div class="big" id="mBig">7</div>
@@ -315,7 +334,7 @@ const MEDALLAS=[
 ];
 
 
-let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[]};
+let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{}};
 let audioDays=new Set();
 let view=new Date(); view.setDate(1);
 let lastAnim=null, curDay=null;
@@ -326,6 +345,8 @@ function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toas
 function merge(o){
   if(!o||typeof o!=='object')return;
   if(typeof o.title==='string'&&o.title!=='Días de distancia')state.title=o.title;
+  if(Array.isArray(o.trained))state.trained=o.trained.filter(x=>typeof x==='string');
+  if(o.moods&&typeof o.moods==='object')state.moods=Object.fromEntries(Object.entries(o.moods).filter(([k,v])=>typeof v==='string'));
   if(Array.isArray(o.medals))state.medals=o.medals.filter(n=>typeof n==='number');
   if(typeof o.start==='string')state.start=o.start;
   if(Number(o.goal)>0)state.goal=Number(o.goal);
@@ -379,6 +400,7 @@ function render(){
   const endK=key(endDay());
   $('endTxt').textContent=parse(endK).toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
   const tk=todayK(),done=state.marked.includes(tk);
+  const tr=state.trained.includes(tk);$('fitBtn').classList.toggle('on',tr);$('fitN').textContent=state.trained.length;
   $('todayBtn').textContent=done?'✓ Hoy ya está tachado':'Tachar hoy';$('todayBtn').classList.toggle('done',done);
   $('month').textContent=cap(view.toLocaleDateString('es-AR',{month:'long',year:'numeric'}));
   const grid=$('grid');grid.innerHTML='';
@@ -395,8 +417,10 @@ function render(){
     if(k===state.start)e.classList.add('start');
     if(k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
     if(audioDays.has(k))e.insertAdjacentHTML('beforeend','<span class="mic"></span>');
+    if(state.moods[k])e.insertAdjacentHTML('beforeend','<span class="emo">'+state.moods[k]+'</span>');
+    if(state.trained.includes(k))e.insertAdjacentHTML('beforeend','<span class="fit"></span>');
     if(set.has(k)){e.classList.add('marked');if(k===lastAnim)e.classList.add('anim');e.insertAdjacentHTML('beforeend','<svg viewBox="0 0 24 24"><path d="M4 4 L20 20"/><path d="M20 4 L4 20"/></svg>')}
-    if(k<=tk)e.onclick=()=>openDay(k);
+    if(k<=tk)bindDay(e,k);
     grid.appendChild(e);
   }
   lastAnim=null;
@@ -428,6 +452,32 @@ function renderMedals(){
     c.appendChild(b);
   });
 }
+function toggleFit(k){
+  const i=state.trained.indexOf(k);
+  if(i>=0)state.trained.splice(i,1);else{state.trained.push(k);try{navigator.vibrate&&navigator.vibrate(15)}catch(e){};toast('💪 Entrenamiento registrado')}
+  state.trained.sort();save();render();
+}
+const EMOJIS=['😊','😌','😐','😔','😢','😡','😴','💪','❤️','🙏'];
+let emoDay=null;
+function openEmo(k){
+  emoDay=k;$('emoSub').textContent=fmtLong(k);
+  const g=$('emoGrid');g.innerHTML='';
+  EMOJIS.forEach(x=>{const b=document.createElement('button');b.textContent=x;if(state.moods[k]===x)b.className='sel';
+    b.onclick=()=>{state.moods[emoDay]=x;save();render();$('emoSheet').classList.remove('open')};g.appendChild(b)});
+  $('emoSheet').classList.add('open');try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}
+}
+$('emoClear').onclick=()=>{delete state.moods[emoDay];save();render();$('emoSheet').classList.remove('open')};
+$('emoClose').onclick=()=>$('emoSheet').classList.remove('open');
+$('emoSheet').onclick=e=>{if(e.target.id==='emoSheet')$('emoSheet').classList.remove('open')};
+function bindDay(e,k){
+  let t=null,long=false,sx=0,sy=0;
+  const cancel=()=>{clearTimeout(t);t=null;e.classList.remove('press')};
+  e.addEventListener('pointerdown',ev=>{long=false;sx=ev.clientX;sy=ev.clientY;e.classList.add('press');t=setTimeout(()=>{long=true;e.classList.remove('press');openEmo(k)},450)});
+  e.addEventListener('pointermove',ev=>{if(t&&(Math.abs(ev.clientX-sx)>10||Math.abs(ev.clientY-sy)>10))cancel()});
+  e.addEventListener('pointerup',cancel);e.addEventListener('pointerleave',cancel);e.addEventListener('pointercancel',cancel);
+  e.addEventListener('contextmenu',ev=>ev.preventDefault());
+  e.addEventListener('click',()=>{if(long){long=false;return}openDay(k)});
+}
 function toggle(k){
   const i=state.marked.indexOf(k);
   if(i>=0)state.marked.splice(i,1);else{state.marked.push(k);lastAnim=k;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}}
@@ -446,7 +496,8 @@ async function openDay(k){
   await showMemo(k);
   $('daySheet').classList.add('open');
 }
-function refreshDayToggle(){const m=state.marked.includes(curDay);$('dayToggle').textContent=m?'Destachar este día':'Tachar este día';$('dayToggle').className=m?'':'primary'}
+function refreshDayToggle(){const f=state.trained.includes(curDay);$('dayFit').textContent=f?'💪 Entrené ✓':'💪 Entrené';$('dayFit').style.color=f?'var(--ok)':'';$('dayFit').style.borderColor=f?'#2f4a3c':'';
+  const m=state.marked.includes(curDay);$('dayToggle').textContent=m?'Destachar este día':'Tachar este día';$('dayToggle').className=m?'':'primary'}
 async function showMemo(k){
   const p=$('player');if(playURL){URL.revokeObjectURL(playURL);playURL=null}
   let m=null;try{if(idb)m=await getMemo(k)}catch(e){}
@@ -483,6 +534,7 @@ $('delMemo').onclick=async e=>{
   try{await delMemo(curDay);audioDays.delete(curDay);render();showMemo(curDay);toast('Audio borrado')}catch(err){}
 };
 $('dayToggle').onclick=()=>{toggle(curDay);refreshDayToggle()};
+$('dayFit').onclick=()=>{toggleFit(curDay);refreshDayToggle()};
 function closeDay(){stopRec();$('player').pause();$('daySheet').classList.remove('open');$('delMemo').dataset.c='';$('delMemo').textContent='Borrar audio'}
 $('closeDay').onclick=closeDay;
 $('daySheet').onclick=e=>{if(e.target.id==='daySheet')closeDay()};
@@ -490,6 +542,7 @@ $('daySheet').onclick=e=>{if(e.target.id==='daySheet')closeDay()};
 /* ---- UI general ---- */
 $('todayBtn').onclick=()=>{const k=todayK();if(!state.marked.includes(k))toggle(k)};
 $('todayMemo').onclick=()=>openDay(todayK());
+$('fitBtn').onclick=()=>toggleFit(todayK());
 $('jumpEnd').onclick=()=>{const e=endDay();view=new Date(e.getFullYear(),e.getMonth(),1);render()};
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
