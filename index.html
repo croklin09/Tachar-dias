@@ -146,7 +146,7 @@
     <button class="btn" id="todayBtn">Tachar hoy</button>
     <button class="btn ghost fit" id="fitBtn" aria-label="Entrené hoy">💪 <span id="fitN">0</span></button>
     <button class="btn ghost" id="todayMemo" aria-label="Memoria de hoy">🎙</button>
-    <button class="btn ghost" id="openBreath" aria-label="Respirar">🌬</button>
+    <button class="btn ghost fit" id="openBreath" aria-label="Meditar">🧘 <span id="medN">10</span></button>
   </div>
 
   <section class="cal">
@@ -214,7 +214,8 @@
 
 <div class="breath" id="breath">
   <div style="text-align:center">
-    <h3>Respirar</h3>
+    <h3>Meditar</h3>
+    <p class="bsub" id="bToday" style="color:var(--ok);margin-bottom:0"></p>
     <p class="bsub" id="bDesc">Elegí un ritmo y un tiempo</p>
     <div class="bopts" id="bPat"></div>
     <div class="bopts" id="bDur"></div>
@@ -334,7 +335,7 @@ const MEDALLAS=[
 ];
 
 
-let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{}};
+let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{},medit:{}};
 let audioDays=new Set();
 let view=new Date(); view.setDate(1);
 let lastAnim=null, curDay=null;
@@ -345,6 +346,7 @@ function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toas
 function merge(o){
   if(!o||typeof o!=='object')return;
   if(typeof o.title==='string'&&o.title!=='Días de distancia')state.title=o.title;
+  if(o.medit&&typeof o.medit==='object')state.medit=Object.fromEntries(Object.entries(o.medit).filter(([k,v])=>typeof v==='number'));
   if(Array.isArray(o.trained))state.trained=o.trained.filter(x=>typeof x==='string');
   if(o.moods&&typeof o.moods==='object')state.moods=Object.fromEntries(Object.entries(o.moods).filter(([k,v])=>typeof v==='string'));
   if(Array.isArray(o.medals))state.medals=o.medals.filter(n=>typeof n==='number');
@@ -391,6 +393,7 @@ const fmtLong=k=>cap(parse(k).toLocaleDateString('es-AR',{weekday:'long',day:'nu
 
 function render(){
   $('title').value=state.title;
+  renderMed();
   renderMedals();
   const s=streak(),g=state.goal;
   $('streak').textContent=s;$('total').textContent=state.marked.length;
@@ -566,15 +569,29 @@ const PATRONES=[
  {id:'caja',n:'Caja 4-4-4-4',d:'Ritmo parejo para ordenar la cabeza.',f:[['Inhalá',4,1],['Sostené',4,1],['Exhalá',4,0],['Sostené',4,0]]},
  {id:'478',n:'4-7-8',d:'Para relajarte o dormir.',f:[['Inhalá',4,1],['Sostené',7,1],['Exhalá',8,0]]}
 ];
-const DURS=[1,3,5];
-let bPat=PATRONES[0],bMin=3,bRun=null;
+const DURS=[1,3,5,10];
+const MED_GOAL=600;
+let bPat=PATRONES[0],bMin=10,bRun=null;
+function medDone(){const t=todayK();return (state.medit[t]||0)+(bRun&&bRun.st?Math.floor((Date.now()-bRun.st)/1000):0)}
+function renderMed(){
+  const d=medDone(),left=Math.max(0,MED_GOAL-d);
+  const done=left===0;
+  $('medN').textContent=done?'✓':Math.ceil(left/60);
+  $('openBreath').classList.toggle('on',done);
+  $('bToday').textContent=done?'Meta de hoy cumplida: '+Math.floor(d/60)+' min ✓':'Hoy: '+Math.floor(d/60)+' de 10 min · faltan '+fmtT(left);
+}
+function medCommit(){
+  if(!bRun||!bRun.st)return;
+  const t=todayK(),sec=Math.floor((Date.now()-bRun.st)/1000);bRun.st=null;
+  if(sec>0){state.medit[t]=(state.medit[t]||0)+sec;save()}
+}
 function bOpts(){
   $('bPat').innerHTML='';PATRONES.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;if(p===bPat)b.className='sel';b.onclick=()=>{if(bRun)return;bPat=p;bOpts()};$('bPat').appendChild(b)});
   $('bDur').innerHTML='';DURS.forEach(m=>{const b=document.createElement('button');b.textContent=m+' min';if(m===bMin)b.className='sel';b.onclick=()=>{if(bRun)return;bMin=m;bOpts()};$('bDur').appendChild(b)});
   $('bDesc').textContent=bPat.d;
 }
 function bStop(done){
-  if(bRun){clearTimeout(bRun.t);clearInterval(bRun.i)}bRun=null;
+  if(bRun){medCommit();clearTimeout(bRun.t);clearInterval(bRun.i)}bRun=null;renderMed();
   const c=$('bCircle');c.style.transition='transform .8s ease';c.style.transform='scale(.45)';
   $('bPhase').textContent=done?'Bien hecho':'Listo';$('bCount').textContent='';$('bLeft').textContent='';
   $('bStart').textContent='Empezar';
@@ -582,7 +599,7 @@ function bStop(done){
 }
 function bStart(){
   if(bRun){bStop(false);return}
-  const end=Date.now()+bMin*60000;let idx=0;bRun={};
+  const end=Date.now()+bMin*60000;let idx=0;bRun={st:Date.now()};
   $('bStart').textContent='Parar';
   const c=$('bCircle');
   const step=()=>{
@@ -594,7 +611,7 @@ function bStart(){
     c.style.transform=big?'scale(1)':'scale(.45)';
     try{navigator.vibrate&&navigator.vibrate(20)}catch(e){}
     let left=sec;$('bCount').textContent=left;
-    clearInterval(bRun.i);bRun.i=setInterval(()=>{left--;if(left>0)$('bCount').textContent=left;const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent=r>0?('Quedan '+fmtT(r)):'Terminando el ciclo…'},1000);
+    clearInterval(bRun.i);bRun.i=setInterval(()=>{left--;renderMed();if(left>0)$('bCount').textContent=left;const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent=r>0?('Quedan '+fmtT(r)):'Terminando el ciclo…'},1000);
     const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent='Quedan '+fmtT(r);
     idx++;bRun.t=setTimeout(step,sec*1000);
   };
@@ -610,7 +627,7 @@ load();checkMedals(false);render();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 let lastDay=todayK();
 setInterval(()=>{if(todayK()!==lastDay){lastDay=todayK();render()}},60000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&todayK()!==lastDay){lastDay=todayK();render()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&bRun&&bRun.st){medCommit();bRun.st=Date.now()}if(!document.hidden&&todayK()!==lastDay){lastDay=todayK();render()}});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 </body>
