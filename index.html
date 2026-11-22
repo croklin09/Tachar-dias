@@ -127,6 +127,9 @@
   .sosaudio{background:#1c1f25;border:1px solid var(--line);border-radius:14px;padding:12px;width:100%;max-width:400px}
   .sosaudio p{margin:0 0 6px;font-size:13px;color:var(--mute)}
   .sosaudio audio{margin-top:0}
+  .reasons input{margin-bottom:6px;font-size:15px;padding:10px}
+  .sosreasons{width:100%;max-width:400px;text-align:left;margin:0;padding:0;list-style:none}
+  .sosreasons li{background:#1c1f25;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:15px;line-height:1.3}
 </style>
 </head>
 <body>
@@ -202,6 +205,11 @@
     <label for="goalIn">Meta (días)</label>
     <input type="number" id="goalIn" min="1" max="999" inputmode="numeric">
     <div class="row"><button id="closeSet">Cancelar</button><button class="primary" id="saveSet">Guardar</button></div>
+    <div class="memo reasons" style="margin-top:14px">
+      <h4>Mis porqués</h4>
+      <p class="note" style="margin:0 0 10px">Hasta 5 razones para sostener la distancia. Aparecen en el SOS.</p>
+      <input id="r0" maxlength="90" placeholder="Ej.: Merezco a alguien que me elija"><input id="r1" maxlength="90" placeholder="Ej.: Quiero dormir tranquilo"><input id="r2" maxlength="90" placeholder="Razón 3"><input id="r3" maxlength="90" placeholder="Razón 4"><input id="r4" maxlength="90" placeholder="Razón 5">
+    </div>
     <div class="memo" style="margin-top:14px">
       <h4>Audio SOS</h4>
       <p class="note" style="margin:0 0 10px">Un mensaje tuyo para escuchar cuando tengas ganas de escribirle. Hablale a tu yo de ese momento.</p>
@@ -246,6 +254,7 @@
     <p id="sosLabel">Tu mensaje para este momento</p>
     <audio id="sosPlay" controls></audio>
   </div>
+  <ul class="sosreasons" id="sosReasons"></ul>
   <p class="q" id="sosQ"></p>
   <div class="stack">
     <button class="btn" id="sosBreath">Respirar 2 minutos</button>
@@ -376,7 +385,7 @@ const MEDALLAS=[
 ];
 
 
-let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{},medit:{}};
+let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{},medit:{},reasons:[]};
 let audioDays=new Set();
 let view=new Date(); view.setDate(1);
 let lastAnim=null, curDay=null;
@@ -387,6 +396,7 @@ function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toas
 function merge(o){
   if(!o||typeof o!=='object')return;
   if(typeof o.title==='string'&&o.title!=='Días de distancia')state.title=o.title;
+  if(Array.isArray(o.reasons))state.reasons=o.reasons.filter(x=>typeof x==='string').slice(0,5);
   if(o.medit&&typeof o.medit==='object')state.medit=Object.fromEntries(Object.entries(o.medit).filter(([k,v])=>typeof v==='number'));
   if(Array.isArray(o.trained))state.trained=o.trained.filter(x=>typeof x==='string');
   if(o.moods&&typeof o.moods==='object')state.moods=Object.fromEntries(Object.entries(o.moods).filter(([k,v])=>typeof v==='string'));
@@ -591,10 +601,10 @@ $('jumpEnd').onclick=()=>{const e=endDay();view=new Date(e.getFullYear(),e.getMo
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
 $('title').onchange=e=>{state.title=e.target.value.trim()||'Un día a la vez';save();render()};
-$('openSet').onclick=()=>{renderSosSettings();$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='Borrar todos los tachados';$('setSheet').classList.add('open')};
+$('openSet').onclick=()=>{renderSosSettings();for(let i=0;i<5;i++)$('r'+i).value=state.reasons[i]||'';$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='Borrar todos los tachados';$('setSheet').classList.add('open')};
 $('closeSet').onclick=()=>{sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')};
 $('setSheet').onclick=e=>{if(e.target.id==='setSheet'){sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')}};
-$('saveSet').onclick=()=>{if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0){state.goal=g;state.goalSet=true}save();render();$('setSheet').classList.remove('open')};
+$('saveSet').onclick=()=>{state.reasons=[0,1,2,3,4].map(i=>$('r'+i).value.trim()).filter(Boolean);if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0){state.goal=g;state.goalSet=true}save();render();$('setSheet').classList.remove('open')};
 $('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}state.marked=[];save();render();$('setSheet').classList.remove('open')};
 $('exportBtn').onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
@@ -635,7 +645,9 @@ $('sosRec').onclick=()=>{if(sRec&&sRec.state==='recording')sosStop();else sosSta
 $('sosDel').onclick=async e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}b.dataset.c='';b.textContent='Borrar audio SOS';try{await delMemo(SOSK);renderSosSettings();toast('Audio SOS borrado')}catch(err){}};
 async function openSos(){
   const n=streak();$('sosN').textContent=n;$('sosNl').textContent=n===1?'día de racha':'días de racha';
-  $('sosQ').textContent=FRASES[(dayNum()-1)%FRASES.length];
+  const ul=$('sosReasons');ul.innerHTML='';
+  if(state.reasons.length){state.reasons.forEach(r=>{const li=document.createElement('li');li.textContent=r;ul.appendChild(li)});$('sosQ').textContent=''}
+  else{$('sosQ').textContent=FRASES[(dayNum()-1)%FRASES.length]}
   const a=$('sosPlay');if(sosPlayURL){URL.revokeObjectURL(sosPlayURL);sosPlayURL=null}
   let m=null;try{if(idb)m=await getMemo(SOSK)}catch(e){}
   $('sos').classList.add('open');try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
