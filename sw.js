@@ -1,4 +1,4 @@
-const CACHE = 'tachar-dias-v5';
+const CACHE = 'tachar-dias-v6';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-192-maskable.png', 'icon-512-maskable.png'];
 
 self.addEventListener('install', e => {
@@ -14,7 +14,7 @@ self.addEventListener('fetch', e => {
   // App: red primero (para recibir actualizaciones), caché si no hay conexión
   if (url.origin === location.origin) {
     e.respondWith(
-      fetch(req).then(r => { const c = r.clone(); caches.open(CACHE).then(ca => ca.put(req, c)); return r; })
+      fetch(req, { cache: 'no-cache' }).then(r => { const c = r.clone(); caches.open(CACHE).then(ca => ca.put(req, c)); return r; })
         .catch(() => caches.match(req).then(r => r || caches.match('index.html')))
     );
     return;

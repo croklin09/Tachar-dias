@@ -712,7 +712,7 @@ try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}ca
 let lastDay=todayK();
 setInterval(()=>{if(todayK()!==lastDay){lastDay=todayK();render()}},60000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&bRun&&bRun.st){medCommit();bRun.st=Date.now()}if(!document.hidden&&todayK()!==lastDay){lastDay=todayK();render()}});
-if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{}));
 </script>
 </body>
 </html>
