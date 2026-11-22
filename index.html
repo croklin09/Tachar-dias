@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14161a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Tachar días</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#14161a;--card:#1c1f25;--line:#2a2e36;--ink:#ecebe6;--mute:#8b8f98;--accent:#e8735a;--accent2:#f2b8a8;--ok:#7fb59a;--serif:Fraunces,Georgia,serif}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif}
+  body{padding:calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+  .wrap{max-width:460px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+  #title{font-family:var(--serif);font-size:26px;font-weight:700;background:none;border:0;color:var(--ink);width:100%;padding:4px 0;outline:none}
+  #title:focus{border-bottom:1px dashed var(--line)}
+  .gear{background:none;border:1px solid var(--line);color:var(--mute);border-radius:10px;width:40px;height:40px;font-size:18px;cursor:pointer;flex:none}
+  .stats{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+  .ring{position:relative;width:104px;height:104px}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .num b{font-family:var(--serif);font-size:32px;line-height:1}
+  .ring .num span{font-size:11px;color:var(--mute);margin-top:2px}
+  .meta div{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;color:var(--mute)}
+  .meta div b{color:var(--ink);font-weight:600}
+  .msg{font-family:var(--serif);font-size:16px;color:var(--accent2);margin:6px 0 0;line-height:1.3}
+  .actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:14px}
+  .btn{padding:16px;border-radius:14px;border:0;background:var(--accent);color:#1a0f0b;font-weight:600;font-size:16px;cursor:pointer;font-family:inherit}
+  .btn:active{transform:scale(.98)}
+  .btn.done{background:var(--card);color:var(--ok);border:1px solid var(--line)}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);padding:16px 18px}
+  .cal{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+  .calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .calhead h2{font-family:var(--serif);font-weight:500;font-size:19px;margin:0}
+  .calhead button{background:none;border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:10px;font-size:16px;cursor:pointer}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .dow{font-size:11px;color:var(--mute);text-align:center;padding-bottom:4px}
+  .day{position:relative;aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;background:#22262d;border:1px solid transparent;cursor:pointer;user-select:none}
+  .day.empty{background:none;cursor:default}
+  .day.future{color:#4a4f58;background:#1e2127}
+  .day.before{color:#5a5f68}
+  .day.today{border-color:var(--accent)}
+  .day.start::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--ok)}
+  .day svg{position:absolute;inset:14%;width:72%;height:72%;pointer-events:none}
+  .day svg path{stroke:var(--accent);stroke-width:3.2;stroke-linecap:round;fill:none;stroke-dasharray:40}
+  .day.anim svg path{animation:draw .28s ease-out both}
+  .day.anim svg path:nth-child(2){animation-delay:.14s}
+  @keyframes draw{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
+  .day.marked{color:var(--mute)}
+  .day.goal{border:2px solid var(--ok);background:#1f2a25;color:var(--ok);font-weight:600}
+  .day .flag{position:absolute;bottom:1px;right:3px;font-size:11px;line-height:1}
+  .day .mic{position:absolute;bottom:3px;left:4px;width:6px;height:6px;border-radius:50%;background:var(--accent2)}
+  .legend{font-size:12px;color:var(--mute);margin-top:10px;text-align:center;line-height:1.6}
+  .link{background:none;border:0;color:var(--ok);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}
+  .sheet{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:10}
+  .sheet.open{display:flex}
+  .panel{background:var(--card);border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));width:100%;max-width:460px;max-height:90vh;overflow:auto}
+  .panel h3{font-family:var(--serif);margin:0 0 4px;font-size:21px}
+  .panel .sub{color:var(--mute);font-size:13px;margin:0 0 14px}
+  .panel label{display:block;font-size:13px;color:var(--mute);margin:12px 0 6px}
+  .panel input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#14161a;color:var(--ink);font-size:16px;font-family:inherit}
+  .row{display:flex;gap:8px;margin-top:14px}
+  .row button{flex:1;padding:13px;border-radius:12px;border:1px solid var(--line);background:none;color:var(--ink);font-size:15px;cursor:pointer;font-family:inherit}
+  .row .primary{background:var(--accent);color:#1a0f0b;border:0;font-weight:600}
+  .danger{color:#e27b7b !important;border-color:#4a2a2a !important}
+  .memo{background:#14161a;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:6px}
+  .memo h4{margin:0 0 10px;font-size:14px;font-weight:600;color:var(--accent2)}
+  .rec{display:flex;align-items:center;gap:12px}
+  .recbtn{width:64px;height:64px;border-radius:50%;border:0;background:var(--accent);cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center}
+  .recbtn i{display:block;width:22px;height:22px;border-radius:50%;background:#1a0f0b;transition:.2s}
+  .recbtn.on{animation:pulse 1.2s infinite}
+  .recbtn.on i{border-radius:4px}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(232,115,90,.6)}100%{box-shadow:0 0 0 16px rgba(232,115,90,0)}}
+  .rectxt{font-size:14px;color:var(--mute)}
+  .rectxt b{display:block;color:var(--ink);font-size:20px;font-variant-numeric:tabular-nums}
+  audio{width:100%;margin-top:10px}
+  .note{font-size:12px;color:var(--mute);margin-top:8px}
+  .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2a2e36;color:var(--ink);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:20}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <input id="title" value="Días de distancia" aria-label="Título" maxlength="40">
+    <button class="gear" id="openSet" aria-label="Ajustes">⚙</button>
+  </header>
+
+  <section class="stats">
+    <div class="ring">
+      <svg width="104" height="104" viewBox="0 0 104 104">
+        <circle cx="52" cy="52" r="44" stroke="#2a2e36" stroke-width="9" fill="none"/>
+        <circle id="arc" cx="52" cy="52" r="44" stroke="#e8735a" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5" style="transition:stroke-dashoffset .5s"/>
+      </svg>
+      <div class="num"><b id="streak">0</b><span>racha</span></div>
+    </div>
+    <div class="meta">
+      <div>Tachados <b id="total">0</b></div>
+      <div>Meta <b id="goalTxt">30 días</b></div>
+      <div>Faltan <b id="left">30</b></div>
+      <div>Día final <b id="endTxt">—</b></div>
+      <p class="msg" id="msg"></p>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button class="btn" id="todayBtn">Tachar hoy</button>
+    <button class="btn ghost" id="todayMemo" aria-label="Memoria de hoy">🎙</button>
+  </div>
+
+  <section class="cal">
+    <div class="calhead">
+      <button id="prev" aria-label="Mes anterior">‹</button>
+      <h2 id="month"></h2>
+      <button id="next" aria-label="Mes siguiente">›</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="legend">Tocá un día para tacharlo o grabar su memoria<br>● inicio · <span style="color:var(--accent2)">●</span> tiene audio · 🏁 día final · <button class="link" id="jumpEnd">ir al día final</button></div>
+  </section>
+</div>
+
+<!-- Día -->
+<div class="sheet" id="daySheet">
+  <div class="panel">
+    <h3 id="dayTitle"></h3>
+    <p class="sub" id="daySub"></p>
+    <div class="row" style="margin-top:0"><button class="primary" id="dayToggle"></button></div>
+    <div class="memo">
+      <h4>Memoria del día</h4>
+      <div class="rec">
+        <button class="recbtn" id="recBtn" aria-label="Grabar"><i></i></button>
+        <div class="rectxt" id="recTxt"><b>0:00</b>Tocá para grabar (máx. 2 min)</div>
+      </div>
+      <audio id="player" controls hidden></audio>
+      <div class="row" id="memoActions" hidden><button class="danger" id="delMemo">Borrar audio</button></div>
+      <p class="note">Los audios se guardan solo en este teléfono.</p>
+    </div>
+    <div class="row"><button id="closeDay">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- Ajustes -->
+<div class="sheet" id="setSheet">
+  <div class="panel">
+    <h3>Ajustes</h3>
+    <label for="startIn">Día de inicio</label>
+    <input type="date" id="startIn">
+    <label for="goalIn">Meta (días)</label>
+    <input type="number" id="goalIn" min="1" max="999" inputmode="numeric">
+    <div class="row"><button id="closeSet">Cancelar</button><button class="primary" id="saveSet">Guardar</button></div>
+    <div class="row"><button id="exportBtn">Exportar respaldo</button><button id="importBtn">Importar</button></div>
+    <input type="file" id="importIn" accept="application/json" hidden>
+    <div class="row"><button class="danger" id="resetBtn">Borrar todos los tachados</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const pad=n=>String(n).padStart(2,'0');
+const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const todayK=()=>key(new Date());
+const $=id=>document.getElementById(id);
+const LS='tachar-dias-v1';
+
+let state={title:'Días de distancia',start:todayK(),goal:30,marked:[]};
+let audioDays=new Set();
+let view=new Date(); view.setDate(1);
+let lastAnim=null, curDay=null;
+
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200)}
+function load(){try{const o=JSON.parse(localStorage.getItem(LS)||'null');if(o)merge(o)}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('No se pudo guardar')}}
+function merge(o){
+  if(!o||typeof o!=='object')return;
+  if(typeof o.title==='string')state.title=o.title;
+  if(typeof o.start==='string')state.start=o.start;
+  if(Number(o.goal)>0)state.goal=Number(o.goal);
+  if(Array.isArray(o.marked))state.marked=o.marked.filter(x=>typeof x==='string').sort();
+}
+
+/* ---- IndexedDB para audios ---- */
+let idb=null;
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open('tachar-dias',1);r.onupgradeneeded=()=>r.result.createObjectStore('memos');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+function tx(mode,fn){return new Promise((res,rej)=>{const t=idb.transaction('memos',mode);const s=t.objectStore('memos');const r=fn(s);t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})}
+const getMemo=k=>tx('readonly',s=>s.get(k));
+const putMemo=(k,v)=>tx('readwrite',s=>s.put(v,k));
+const delMemo=k=>tx('readwrite',s=>s.delete(k));
+const memoKeys=()=>tx('readonly',s=>s.getAllKeys());
+
+/* ---- lógica ---- */
+function streak(){const set=new Set(state.marked);let n=0;const d=new Date();if(!set.has(key(d)))d.setDate(d.getDate()-1);while(set.has(key(d))){n++;d.setDate(d.getDate()-1)}return n}
+function endDay(){
+  const set=new Set(state.marked);const d=new Date();
+  if(!set.has(key(d)))d.setDate(d.getDate()-1);
+  if(!set.has(key(d))){const t=new Date();t.setDate(t.getDate()+state.goal-1);return t}
+  while(set.has(key(d)))d.setDate(d.getDate()-1);
+  d.setDate(d.getDate()+state.goal);return d;
+}
+function message(s,g){
+  if(s===0)return 'Un día a la vez. Hoy cuenta.';
+  if(s>=g)return '¡Meta cumplida! Mirá todo lo que sostuviste.';
+  if(s<3)return 'Empezaste. Lo más difícil ya pasó.';
+  if(s<7)return 'Se está armando el hábito.';
+  if(s<14)return 'Más de una semana. Se nota.';
+  if(s<21)return 'Ya no es esfuerzo, es dirección.';
+  return 'Falta poco. Seguí así.';
+}
+const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+const fmtLong=k=>cap(parse(k).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}));
+
+function render(){
+  $('title').value=state.title;
+  const s=streak(),g=state.goal;
+  $('streak').textContent=s;$('total').textContent=state.marked.length;
+  $('goalTxt').textContent=g+' días';$('left').textContent=Math.max(0,g-s);
+  $('arc').style.strokeDashoffset=276.5*(1-Math.min(1,s/g));
+  $('msg').textContent=message(s,g);
+  const endK=key(endDay());
+  $('endTxt').textContent=parse(endK).toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
+  const tk=todayK(),done=state.marked.includes(tk);
+  $('todayBtn').textContent=done?'✓ Hoy ya está tachado':'Tachar hoy';$('todayBtn').classList.toggle('done',done);
+  $('month').textContent=cap(view.toLocaleDateString('es-AR',{month:'long',year:'numeric'}));
+  const grid=$('grid');grid.innerHTML='';
+  ['L','M','M','J','V','S','D'].forEach(x=>{const e=document.createElement('div');e.className='dow';e.textContent=x;grid.appendChild(e)});
+  const first=(view.getDay()+6)%7,days=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+  for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day empty';grid.appendChild(e)}
+  const set=new Set(state.marked);
+  for(let d=1;d<=days;d++){
+    const k=key(new Date(view.getFullYear(),view.getMonth(),d));
+    const e=document.createElement('div');e.className='day';e.textContent=d;
+    if(k>tk)e.classList.add('future');
+    if(k<state.start)e.classList.add('before');
+    if(k===tk)e.classList.add('today');
+    if(k===state.start)e.classList.add('start');
+    if(k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
+    if(audioDays.has(k))e.insertAdjacentHTML('beforeend','<span class="mic"></span>');
+    if(set.has(k)){e.classList.add('marked');if(k===lastAnim)e.classList.add('anim');e.insertAdjacentHTML('beforeend','<svg viewBox="0 0 24 24"><path d="M4 4 L20 20"/><path d="M20 4 L4 20"/></svg>')}
+    if(k<=tk)e.onclick=()=>openDay(k);
+    grid.appendChild(e);
+  }
+  lastAnim=null;
+}
+function toggle(k){
+  const i=state.marked.indexOf(k);
+  if(i>=0)state.marked.splice(i,1);else{state.marked.push(k);lastAnim=k;try{navigator.vibrate&&navigator.vibrate(15)}catch(e){}}
+  state.marked.sort();save();render();
+}
+
+/* ---- hoja del día + grabación ---- */
+let rec=null,chunks=[],recStart=0,recTimer=null,stream=null,playURL=null;
+const MAX=120;
+function fmtT(s){return Math.floor(s/60)+':'+pad(Math.floor(s%60))}
+async function openDay(k){
+  curDay=k;
+  $('dayTitle').textContent=fmtLong(k);
+  $('daySub').textContent=k===todayK()?'Hoy':'';
+  refreshDayToggle();
+  await showMemo(k);
+  $('daySheet').classList.add('open');
+}
+function refreshDayToggle(){const m=state.marked.includes(curDay);$('dayToggle').textContent=m?'Destachar este día':'Tachar este día';$('dayToggle').className=m?'':'primary'}
+async function showMemo(k){
+  const p=$('player');if(playURL){URL.revokeObjectURL(playURL);playURL=null}
+  let m=null;try{if(idb)m=await getMemo(k)}catch(e){}
+  if(m&&m.blob){playURL=URL.createObjectURL(m.blob);p.src=playURL;p.hidden=false;$('memoActions').hidden=false;$('recTxt').innerHTML='<b>'+fmtT(m.dur||0)+'</b>Grabar de nuevo reemplaza este audio'}
+  else{p.removeAttribute('src');p.hidden=true;$('memoActions').hidden=true;$('recTxt').innerHTML='<b>0:00</b>Tocá para grabar (máx. 2 min)'}
+}
+function pickType(){const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];for(const t of c){try{if(MediaRecorder.isTypeSupported(t))return t}catch(e){}}return ''}
+async function startRec(){
+  if(!idb){toast('Este navegador no permite guardar audios');return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Grabación no disponible en este navegador');return}
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('Necesito permiso de micrófono');return}
+  const type=pickType();
+  try{rec=type?new MediaRecorder(stream,{mimeType:type}):new MediaRecorder(stream)}catch(e){rec=new MediaRecorder(stream)}
+  chunks=[];const day=curDay;
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  rec.onstop=async()=>{
+    clearInterval(recTimer);stream.getTracks().forEach(t=>t.stop());
+    $('recBtn').classList.remove('on');
+    const dur=(Date.now()-recStart)/1000;
+    if(!chunks.length||dur<0.5){toast('Grabación muy corta');showMemo(day);return}
+    const blob=new Blob(chunks,{type:rec.mimeType||type||'audio/webm'});
+    try{await putMemo(day,{blob,dur,at:Date.now()});audioDays.add(day);toast('Memoria guardada');render();if(curDay===day)showMemo(day)}
+    catch(e){toast('No se pudo guardar el audio')}
+  };
+  rec.start(250);recStart=Date.now();$('recBtn').classList.add('on');
+  $('player').pause();
+  recTimer=setInterval(()=>{const s=(Date.now()-recStart)/1000;$('recTxt').innerHTML='<b>'+fmtT(s)+'</b>Grabando… tocá para parar';if(s>=MAX)stopRec()},250);
+}
+function stopRec(){if(rec&&rec.state==='recording')rec.stop()}
+$('recBtn').onclick=()=>{if(rec&&rec.state==='recording')stopRec();else startRec()};
+$('delMemo').onclick=async e=>{
+  const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}
+  b.dataset.c='';b.textContent='Borrar audio';
+  try{await delMemo(curDay);audioDays.delete(curDay);render();showMemo(curDay);toast('Audio borrado')}catch(err){}
+};
+$('dayToggle').onclick=()=>{toggle(curDay);refreshDayToggle()};
+function closeDay(){stopRec();$('player').pause();$('daySheet').classList.remove('open');$('delMemo').dataset.c='';$('delMemo').textContent='Borrar audio'}
+$('closeDay').onclick=closeDay;
+$('daySheet').onclick=e=>{if(e.target.id==='daySheet')closeDay()};
+
+/* ---- UI general ---- */
+$('todayBtn').onclick=()=>{const k=todayK();if(!state.marked.includes(k))toggle(k)};
+$('todayMemo').onclick=()=>openDay(todayK());
+$('jumpEnd').onclick=()=>{const e=endDay();view=new Date(e.getFullYear(),e.getMonth(),1);render()};
+$('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
+$('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
+$('title').onchange=e=>{state.title=e.target.value.trim()||'Días de distancia';save();render()};
+$('openSet').onclick=()=>{$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='Borrar todos los tachados';$('setSheet').classList.add('open')};
+$('closeSet').onclick=()=>$('setSheet').classList.remove('open');
+$('setSheet').onclick=e=>{if(e.target.id==='setSheet')$('setSheet').classList.remove('open')};
+$('saveSet').onclick=()=>{if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0)state.goal=g;save();render();$('setSheet').classList.remove('open')};
+$('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}state.marked=[];save();render();$('setSheet').classList.remove('open')};
+$('exportBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tachar-dias-respaldo-'+todayK()+'.json';document.body.appendChild(a);a.click();a.remove();
+  toast('Respaldo descargado (sin audios)');
+};
+$('importBtn').onclick=()=>$('importIn').click();
+$('importIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{merge(JSON.parse(await f.text()));save();render();toast('Respaldo importado')}catch(err){toast('Archivo inválido')}e.target.value=''};
+
+/* ---- init ---- */
+load();render();
+(async()=>{try{idb=await openDB();(await memoKeys()||[]).forEach(k=>audioDays.add(k));render()}catch(e){}})();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+let lastDay=todayK();
+setInterval(()=>{if(todayK()!==lastDay){lastDay=todayK();render()}},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&todayK()!==lastDay){lastDay=todayK();render()}});
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
