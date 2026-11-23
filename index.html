@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#14161a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Un día a la vez</title>
+<title>一天一天</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -149,9 +149,9 @@
 <body>
 <div class="wrap">
   <header>
-    <input id="title" value="Un día a la vez" aria-label="Título" maxlength="40">
+    <input id="title" value="一天一天" aria-label="标题" maxlength="40">
     <button class="sosbtn" id="openSos" aria-label="SOS">SOS</button>
-    <button class="gear" id="openSet" aria-label="Ajustes">⚙</button>
+    <button class="gear" id="openSet" aria-label="设置">⚙</button>
   </header>
 
   <section class="stats">
@@ -160,33 +160,33 @@
         <circle cx="52" cy="52" r="44" stroke="#2a2e36" stroke-width="9" fill="none"/>
         <circle id="arc" cx="52" cy="52" r="44" stroke="#e8735a" stroke-width="9" fill="none" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5" style="transition:stroke-dashoffset .5s"/>
       </svg>
-      <div class="num"><b id="streak">0</b><span>racha</span></div>
+      <div class="num"><b id="streak">0</b><span>连续</span></div>
     </div>
     <div class="meta">
-      <div><span id="totalL">Tachados</span> <b id="total">0</b></div>
-      <div>Meta <b id="goalTxt">90 días</b></div>
-      <div>Faltan <b id="left">90</b></div>
-      <div>Día final <b id="endTxt">—</b></div>
+      <div><span id="totalL">好 / 错</span> <b id="total">0</b></div>
+      <div>目标 <b id="goalTxt">90 天</b></div>
+      <div>还剩 <b id="left">90</b></div>
+      <div>终点 <b id="endTxt">—</b></div>
     </div>
-    <div class="quote"><small id="qDay">Día 1</small><p id="msg"></p></div>
+    <div class="quote"><small id="qDay">第 1 天</small><p id="msg"></p></div>
     <div class="medals" id="medals"></div>
   </section>
 
   <div class="actions" style="grid-template-columns:1fr auto auto auto">
-    <button class="btn" id="todayBtn">Tachar hoy</button>
-    <button class="btn ghost fit" id="fitBtn" aria-label="Entrené hoy">💪 <span id="fitN">0</span></button>
-    <button class="btn ghost" id="todayMemo" aria-label="Memoria de hoy">🎙</button>
-    <button class="btn ghost fit" id="openBreath" aria-label="Meditar">🧘 <span id="medN">10</span></button>
+    <button class="btn" id="todayBtn">今天 好</button>
+    <button class="btn ghost fit" id="fitBtn" aria-label="今天运动了">💪 <span id="fitN">0</span></button>
+    <button class="btn ghost" id="todayMemo" aria-label="今天的录音">🎙</button>
+    <button class="btn ghost fit" id="openBreath" aria-label="冥想">🧘 <span id="medN">10</span></button>
   </div>
 
   <section class="cal">
     <div class="calhead">
-      <button id="prev" aria-label="Mes anterior">‹</button>
+      <button id="prev" aria-label="上个月">‹</button>
       <h2 id="month"></h2>
-      <button id="next" aria-label="Mes siguiente">›</button>
+      <button id="next" aria-label="下个月">›</button>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="legend">Tocá: 好 → 错 → borrar · Mantené apretado: detalles<br><span style="color:var(--accent2)">●</span> audio · <span style="color:var(--ok)">▬</span> entreno · 🏁 final · <button class="link" id="jumpEnd">ir al final</button></div>
+    <div class="legend">点一下：好 → 错 → 清除 · 长按：详情<br><span style="color:var(--accent2)">●</span> 录音 · <span style="color:var(--ok)">▬</span> 运动 · 🏁 终点 · <button class="link" id="jumpEnd">去终点</button></div>
   </section>
 </div>
 
@@ -196,56 +196,56 @@
     <h3 id="dayTitle"></h3>
     <p class="sub" id="daySub"></p>
     <div class="row" style="margin-top:0"><button id="dayGood">好</button><button id="dayBad">错</button><button id="dayFit"></button></div>
-    <div class="row" style="margin-top:8px"><button id="dayEmo">Reacción 😊</button></div>
+    <div class="row" style="margin-top:8px"><button id="dayEmo">心情 😊</button></div>
     <div class="memo">
-      <h4>Memoria del día</h4>
+      <h4>今天的录音</h4>
       <div class="rec">
-        <button class="recbtn" id="recBtn" aria-label="Grabar"><i></i></button>
-        <div class="rectxt" id="recTxt"><b>0:00</b>Tocá para grabar (máx. 2 min)</div>
+        <button class="recbtn" id="recBtn" aria-label="录音"><i></i></button>
+        <div class="rectxt" id="recTxt"><b>0:00</b>点一下开始录音（最多 2 分钟）</div>
       </div>
       <audio id="player" controls hidden></audio>
-      <div class="row" id="memoActions" hidden><button class="danger" id="delMemo">Borrar audio</button></div>
-      <p class="note">Los audios se guardan solo en este teléfono.</p>
+      <div class="row" id="memoActions" hidden><button class="danger" id="delMemo">删除录音</button></div>
+      <p class="note">录音只保存在这部手机上。</p>
     </div>
-    <div class="row"><button id="closeDay">Cerrar</button></div>
+    <div class="row"><button id="closeDay">关闭</button></div>
   </div>
 </div>
 
 <!-- Ajustes -->
 <div class="sheet" id="setSheet">
   <div class="panel">
-    <h3>Ajustes</h3>
-    <label for="startIn">Día de inicio</label>
+    <h3>设置</h3>
+    <label for="startIn">开始日期</label>
     <input type="date" id="startIn">
-    <label for="goalIn">Meta (días)</label>
+    <label for="goalIn">目标（天）</label>
     <input type="number" id="goalIn" min="1" max="999" inputmode="numeric">
-    <div class="row"><button id="closeSet">Cancelar</button><button class="primary" id="saveSet">Guardar</button></div>
+    <div class="row"><button id="closeSet">取消</button><button class="primary" id="saveSet">保存</button></div>
     <div class="memo reasons" style="margin-top:14px">
-      <h4>Mis porqués</h4>
-      <p class="note" style="margin:0 0 10px">Hasta 5 razones para sostener la distancia. Aparecen en el SOS.</p>
-      <input id="r0" maxlength="90" placeholder="Ej.: Merezco a alguien que me elija"><input id="r1" maxlength="90" placeholder="Ej.: Quiero dormir tranquilo"><input id="r2" maxlength="90" placeholder="Razón 3"><input id="r3" maxlength="90" placeholder="Razón 4"><input id="r4" maxlength="90" placeholder="Razón 5">
+      <h4>我的理由</h4>
+      <p class="note" style="margin:0 0 10px">最多 5 个坚持下去的理由。会显示在 SOS 里。</p>
+      <input id="r0" maxlength="90" placeholder="例如：我值得一个选择我的人"><input id="r1" maxlength="90" placeholder="例如：我想安心睡觉"><input id="r2" maxlength="90" placeholder="理由 3"><input id="r3" maxlength="90" placeholder="理由 4"><input id="r4" maxlength="90" placeholder="理由 5">
     </div>
     <div class="memo" style="margin-top:14px">
-      <h4>Audio SOS</h4>
-      <p class="note" style="margin:0 0 10px">Un mensaje tuyo para escuchar cuando tengas ganas de escribirle. Hablale a tu yo de ese momento.</p>
+      <h4>SOS 录音</h4>
+      <p class="note" style="margin:0 0 10px">录一段给自己的话，在想联系她的时候听。对那个时刻的自己说话。</p>
       <div class="rec">
-        <button class="recbtn" id="sosRec" aria-label="Grabar audio SOS"><i></i></button>
-        <div class="rectxt" id="sosTxt"><b>0:00</b>Tocá para grabar (máx. 2 min)</div>
+        <button class="recbtn" id="sosRec" aria-label="录 SOS"><i></i></button>
+        <div class="rectxt" id="sosTxt"><b>0:00</b>点一下开始录音（最多 2 分钟）</div>
       </div>
       <audio id="sosPlayer" controls hidden></audio>
-      <div class="row" id="sosActions" hidden><button class="danger" id="sosDel">Borrar audio SOS</button></div>
+      <div class="row" id="sosActions" hidden><button class="danger" id="sosDel">删除 SOS 录音</button></div>
     </div>
-    <div class="row"><button id="exportBtn">Exportar respaldo</button><button id="importBtn">Importar</button></div>
+    <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
-    <div class="row"><button class="danger" id="resetBtn">Borrar todos los tachados</button></div>
+    <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
   </div>
 </div>
 <div class="sheet" id="emoSheet">
   <div class="panel">
-    <h3 id="emoTitle">¿Cómo fue el día?</h3>
+    <h3 id="emoTitle">今天过得怎么样？</h3>
     <p class="sub" id="emoSub"></p>
     <div class="emogrid" id="emoGrid"></div>
-    <div class="row"><button id="emoClear">Quitar</button><button id="emoClose">Cerrar</button></div>
+    <div class="row"><button id="emoClear">清除</button><button id="emoClose">关闭</button></div>
   </div>
 </div>
 
@@ -254,41 +254,41 @@
     <div class="big" id="mBig">7</div>
     <h3 id="mName"></h3>
     <p class="sub" id="mSub"></p>
-    <div class="row"><button class="primary" id="mClose">Seguir</button></div>
+    <div class="row"><button class="primary" id="mClose">继续</button></div>
   </div>
 </div>
 
 <div class="sos" id="sos">
   <div>
-    <div class="k">Pará un segundo</div>
+    <div class="k">停一下</div>
     <div class="n" id="sosN">0</div>
-    <div class="k" id="sosNl">días de racha</div>
-    <h2>¿Vale la pena empezar de cero?</h2>
+    <div class="k" id="sosNl">连续天数</div>
+    <h2>值得从零开始吗？</h2>
   </div>
   <div class="sosaudio" id="sosBox">
-    <p id="sosLabel">Tu mensaje para este momento</p>
+    <p id="sosLabel">给这个时刻的你</p>
     <audio id="sosPlay" controls></audio>
   </div>
   <ul class="sosreasons" id="sosReasons"></ul>
   <p class="q" id="sosQ"></p>
   <div class="stack">
-    <button class="btn" id="sosBreath">Respirar 2 minutos</button>
-    <button class="btn ghost" id="sosOk">Ya pasó, sigo firme</button>
+    <button class="btn" id="sosBreath">呼吸 2 分钟</button>
+    <button class="btn ghost" id="sosOk">过去了，我很坚定</button>
   </div>
 </div>
 
 <div class="breath" id="breath">
   <div style="text-align:center">
-    <h3>Meditar</h3>
+    <h3>冥想</h3>
     <p class="bsub" id="bToday" style="color:var(--ok);margin-bottom:0"></p>
-    <p class="bsub" id="bDesc">Elegí un ritmo y un tiempo</p>
+    <p class="bsub" id="bDesc">选择节奏和时间</p>
     <div class="bopts" id="bPat"></div>
     <div class="bopts" id="bDur"></div>
   </div>
-  <div class="bstage"><div style="position:relative;width:240px;height:240px"><div class="bcircle" id="bCircle"></div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><b id="bPhase" style="font-family:var(--serif);font-size:24px;font-weight:500">Listo</b><span id="bCount" style="font-size:28px;color:var(--mute);font-variant-numeric:tabular-nums"></span></div></div></div>
+  <div class="bstage"><div style="position:relative;width:240px;height:240px"><div class="bcircle" id="bCircle"></div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><b id="bPhase" style="font-family:var(--serif);font-size:24px;font-weight:500">准备</b><span id="bCount" style="font-size:28px;color:var(--mute);font-variant-numeric:tabular-nums"></span></div></div></div>
   <div class="bfoot">
     <p class="bsub" id="bLeft"></p>
-    <div class="row" style="margin-top:0"><button id="bClose">Cerrar</button><button class="primary" id="bStart">Empezar</button></div>
+    <div class="row" style="margin-top:0"><button id="bClose">关闭</button><button class="primary" id="bStart">开始</button></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -300,107 +300,16 @@ const parse=k=>{const[y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
 const todayK=()=>key(new Date());
 const $=id=>document.getElementById(id);
 const LS='tachar-dias-v1';
-const FRASES=[
-"Hoy no hace falta ganar. Alcanza con no volver atrás.",
-"Lo que duele también está acomodando cosas.",
-"No es debilidad extrañar. Es fortaleza no escribir.",
-"Un día. Solo este. Mañana es otro trabajo.",
-"La distancia no es castigo: es espacio para volver a vos.",
-"Respirá. Lo que sentís hoy no es lo que vas a sentir siempre.",
-"Una semana casi. Tu cabeza ya está aprendiendo el camino nuevo.",
-"No tenés que entenderlo todo para empezar a soltarlo.",
-"Cada día tachado es una decisión que cumpliste.",
-"Diez días. Esto ya no es impulso, es elección.",
-"El silencio también es una respuesta, y es la tuya.",
-"Dejá de buscar señales. La señal sos vos eligiendo tu paz.",
-"Lo que no fue, también te enseñó qué querés.",
-"Si hoy cuesta, hacé lo mínimo. Lo mínimo también suma.",
-"Medio mes. Mirá atrás: ya no sos el del día uno.",
-"No te pongas fecha para estar bien. Ponete días para estar mejor.",
-"Mover el cuerpo ordena la cabeza. Hoy, un poco de movimiento.",
-"Tu energía es finita: ponela donde te devuelve algo.",
-"Extrañar es un recuerdo pasando. Dejalo pasar.",
-"Construí algo hoy, aunque sea chico.",
-"Tres semanas. El hábito ya tiene raíces.",
-"No necesitás cierre de nadie. El cierre lo das vos.",
-"Hay gente que te quiere bien. Escribile a uno hoy.",
-"La versión tuya que viene te va a agradecer esto.",
-"No es olvidarla. Es dejar de esperarla.",
-"Los días buenos llegan sin avisar. Estate presente.",
-"Tu valor no depende de quién te eligió.",
-"Hoy hacé algo solo por gusto. Sin razón.",
-"Un día flojo no borra veintiocho firmes.",
-"Un mes. Lo que parecía imposible ya es tu rutina.",
-"Ahora que el ruido baja, escuchá qué querés vos.",
-"La paz no es aburrida. Es el piso donde se construye.",
-"Dormí bien hoy. Descansar también es avanzar.",
-"Las cosas importantes se hacen de a ladrillo.",
-"No vuelvas a abrir la puerta solo para ver si sigue ahí.",
-"Lo que sembrás en silencio crece igual.",
-"Hoy, una hora para tu proyecto. Solo una.",
-"Aprendiste a estar con vos. Eso no te lo quita nadie.",
-"Si aparece la tentación, mirá esta racha.",
-"Cuarenta días. Ya no estás sosteniendo: estás caminando.",
-"La gratitud cambia el foco. Anotá tres cosas buenas de hoy.",
-"Estar solo no es estar vacío.",
-"Lo que querés para tu vida no entra en lo que te dolía.",
-"Hoy elegí la versión tuya que admirás.",
-"Mes y medio. El que empezó esto estaría orgulloso.",
-"Las heridas cierran desde adentro hacia afuera. Paciencia.",
-"No compitas con nadie. Competí con tu día uno.",
-"Abrí espacio: lo nuevo necesita lugar.",
-"La disciplina es acordarte de lo que querés cuando no tenés ganas.",
-"Cincuenta. Medio camino hecho, y el más difícil.",
-"Salí, mirá la ciudad, dejate sorprender.",
-"Tu historia no se define por un capítulo.",
-"Hoy cuidá tu cuerpo como si fuera tu obra más importante.",
-"Las ganas vuelven. Siempre vuelven.",
-"Hablá bien de vos, incluso en tu cabeza.",
-"Lo que soltás te deja las manos libres.",
-"Cada día igual de firme es un cimiento más profundo.",
-"No esperes estar listo. Empezá y te vas poniendo listo.",
-"Mirá cuánto avanzaste sin darte cuenta.",
-"Dos meses. Esto ya es parte de quién sos.",
-"Hoy hacé un plan con alguien. La conexión cura.",
-"Tu atención es tu tesoro. Ponela en lo que construís.",
-"No hace falta que nadie lo vea. Vos lo sabés.",
-"Lo que vale la pena llega a quien está bien parado.",
-"Sesenta y cinco. Firme, tranquilo, presente.",
-"Recordá por qué empezaste. Y mirá lo lejos que estás.",
-"Hoy probá algo que nunca hiciste.",
-"Ser fiel a vos mismo es la relación más larga que vas a tener.",
-"La calma que tenés hoy, la ganaste día por día.",
-"Setenta días. Ya no es esfuerzo: es identidad.",
-"Volvé a soñar en grande. Hay lugar.",
-"Lo que fue amor sigue siendo tuyo: la capacidad de sentir.",
-"Preparate para lo bueno: ya hiciste lugar.",
-"Hoy reconocete algo. En voz alta, si te animás.",
-"Setenta y cinco. Quince días y lo cerrás.",
-"Las cosas grandes se ven recién al final. Seguí.",
-"Tu futuro no tiene su nombre. Tiene el tuyo.",
-"Ya no buscás afuera lo que encontraste adentro.",
-"Cada día que pasa, la vuelta atrás queda más lejos.",
-"Ochenta. Mirá el anillo: casi completo.",
-"Hoy agradecé al que fuiste en el día uno.",
-"Lo que viene merece a esta versión tuya.",
-"Terminá fuerte. Cada día cuenta igual que el primero.",
-"Te volviste alguien que cumple lo que se promete.",
-"Faltan cinco. Disfrutá el tramo final.",
-"Mirá todo lo que construiste mientras dolía.",
-"La meta ya está a la vista. Caminá tranquilo.",
-"Mañana es el penúltimo. Hoy, simplemente, sumá.",
-"Un día más y cerrás el círculo.",
-"Noventa días. No soltaste a alguien: te encontraste a vos."
-];
+const FRASES=["今天不必赢。不回头就够了。", "痛，也在帮你整理一切。", "想念不是软弱。不发消息才是力量。", "只过这一天。明天是明天的事。", "距离不是惩罚，是回到自己的空间。", "深呼吸。今天的感受不会永远存在。", "快一周了。你的大脑正在学一条新的路。", "不需要全部明白，也可以开始放下。", "每一个“好”都是你守住的承诺。", "十天了。这已经不是冲动，是选择。", "沉默也是一种回答，而且是你的回答。", "别再找信号了。你选择平静，就是信号。", "没有发生的事，也教会了你想要什么。", "今天很难，就做最少的。最少也算数。", "半个月了。回头看看，你已经不是第一天的你。", "别给“好起来”定日期。每天好一点就行。", "动一动身体，脑子会更清楚。今天动一下。", "你的能量有限，放在会回报你的地方。", "想念只是一段回忆经过。让它过去。", "今天建一点东西，哪怕很小。", "三个星期。习惯已经扎根了。", "你不需要别人给你结局。结局由你决定。", "有人真心对你好。今天给其中一个人发消息。", "未来的你会感谢现在的你。", "不是忘记她，是不再等她。", "好日子会突然来。活在当下。", "你的价值不取决于谁选择了你。", "今天做一件只为自己开心的事。", "一个难过的日子，抹不掉二十八个坚定的日子。", "一个月了。曾经觉得不可能的，现在是你的日常。", "噪音变小了，听听你自己想要什么。", "平静不无聊。它是建造一切的地基。", "今天好好睡觉。休息也是前进。", "重要的东西，要一块砖一块砖地建。", "别为了看门还在不在，又去开门。", "安静地种下的，也会长大。", "今天给你的项目一个小时。就一个小时。", "你学会了和自己在一起。这没人能拿走。", "诱惑来了，就看看你的连续天数。", "四十天。你不是在硬撑，你是在前进。", "感恩会改变焦点。写下今天的三件好事。", "一个人不等于空虚。", "你想要的生活，装不下让你痛的东西。", "今天选择你欣赏的那个自己。", "一个半月。开始这件事的你会为你骄傲。", "伤口从里往外愈合。耐心一点。", "不跟别人比。跟第一天的自己比。", "腾出空间：新的东西需要位置。", "自律就是在不想做的时候，记得你想要什么。", "五十天。一半的路走完了，而且是最难的一半。", "出去走走，看看城市，让自己惊喜一下。", "一章不能定义你的整个故事。", "今天照顾你的身体，像照顾你最重要的作品。", "想做事的劲会回来的。总会回来。", "对自己说好话，在心里也一样。", "放开的手，才能拿新的东西。", "每一个坚定的日子，都让地基更深。", "不用等准备好。开始了，就会准备好。", "看看你在不知不觉中走了多远。", "两个月。这已经是你的一部分了。", "今天跟朋友约一下。连接会治愈。", "你的注意力是宝藏，放在你正在建造的东西上。", "不需要别人看见。你自己知道。", "值得的东西，会来到站稳的人身边。", "六十五天。坚定，平静，活在当下。", "记得你为什么开始，再看看你已经走了多远。", "今天试一件从没做过的事。", "忠于自己，是你一生最长的关系。", "你今天的平静，是一天一天赢来的。", "七十天。这已经不是努力，是你的身份。", "重新做大梦吧。现在有空间了。", "爱的能力还是你的。", "为好事做准备：你已经腾出了位置。", "今天认可自己一件事。敢的话，说出来。", "七十五天。再十五天就完成了。", "大事要到最后才看得清。继续走。", "你的未来没有她的名字，只有你的名字。", "你不再从外面找，已经在心里找到的东西。", "每过一天，回头的路就更远一点。", "八十天。看看那个圆环，快满了。", "今天感谢第一天的自己。", "接下来的一切，配得上现在的你。", "坚强地结束。每一天都和第一天一样重要。", "你成了一个说到做到的人。", "还剩五天。享受最后一段路。", "看看你在痛的时候建造了多少。", "目标就在眼前。慢慢走。", "明天是倒数第二天。今天，只要再加一天。", "再一天，这个圆就画完了。", "九十天。你没有失去一个人，你找到了自己。"];
 const MEDALLAS=[
- {d:3,n:'Primer paso',c:'#b87333'},{d:7,n:'Una semana',c:'#b87333'},{d:10,n:'Diez firmes',c:'#b87333'},
- {d:15,n:'Medio mes',c:'#b9bec7'},{d:21,n:'Hábito',c:'#b9bec7'},{d:30,n:'Un mes',c:'#b9bec7'},
- {d:45,n:'Mes y medio',c:'#e5c158'},{d:60,n:'Dos meses',c:'#e5c158'},{d:75,n:'Recta final',c:'#e5c158'},
- {d:90,n:'Libre',c:'#7fb59a'}
+ {d:3,n:'第一步',c:'#b87333'},{d:7,n:'一周',c:'#b87333'},{d:10,n:'坚定十天',c:'#b87333'},
+ {d:15,n:'半个月',c:'#b9bec7'},{d:21,n:'习惯',c:'#b9bec7'},{d:30,n:'一个月',c:'#b9bec7'},
+ {d:45,n:'一个半月',c:'#e5c158'},{d:60,n:'两个月',c:'#e5c158'},{d:75,n:'最后冲刺',c:'#e5c158'},
+ {d:90,n:'自由',c:'#7fb59a'}
 ];
 
 
-let state={title:'Un día a la vez',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{},medit:{},reasons:[],mode:'dist',foco:{},fMedals:[]};
+let state={title:'一天一天',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{},medit:{},reasons:[],mode:'dist',foco:{},fMedals:[]};
 let audioDays=new Set();
 let view=new Date(); view.setDate(1);
 let lastAnim=null, curDay=null;
@@ -409,10 +318,10 @@ function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');cle
 function load(){try{const o=JSON.parse(localStorage.getItem(LS)||'null');if(o)merge(o)}catch(e){}
   if(state.marked.length){state.marked.forEach(k=>{if(!state.foco[k])state.foco[k]='g'});state.marked=[]}
   state.fMedals=[...new Set([...state.fMedals,...state.medals])];state.mode='foco';save()}
-function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('No se pudo guardar')}}
+function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('保存失败')}}
 function merge(o){
   if(!o||typeof o!=='object')return;
-  if(typeof o.title==='string'&&o.title!=='Días de distancia')state.title=o.title;
+  if(typeof o.title==='string'&&o.title!=='Días de distancia'&&o.title!=='Un día a la vez')state.title=o.title;
   if(o.mode==='foco'||o.mode==='dist')state.mode=o.mode;
   if(o.foco&&typeof o.foco==='object')state.foco=Object.fromEntries(Object.entries(o.foco).filter(([k,v])=>v==='g'||v==='b'));
   if(Array.isArray(o.fMedals))state.fMedals=o.fMedals.filter(n=>typeof n==='number');
@@ -460,7 +369,7 @@ function _oldMessage(s,g){
   return 'Falta poco. Seguí así.';
 }
 const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
-const fmtLong=k=>cap(parse(k).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'}));
+const fmtLong=k=>parse(k).toLocaleDateString('zh-CN',{weekday:'long',day:'numeric',month:'long'});
 
 function fStreak(){
   const f=state.foco;const d=new Date();const t=key(d);
@@ -503,13 +412,13 @@ function render(){
   $('arc').style.strokeDashoffset=276.5*(1-Math.min(1,s/g));
   const q=message(s,g);$('msg').textContent=q.t;$('qDay').textContent='Día '+q.n+(q.n>90?'':' de 90');
   const endK=key(endDay());
-  $('endTxt').textContent=parse(endK).toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
+  $('endTxt').textContent=parse(endK).toLocaleDateString('zh-CN',{month:'short',day:'numeric',weekday:'short'});
   const tk=todayK(),done=state.marked.includes(tk);
   const tr=state.trained.includes(tk);$('fitBtn').classList.toggle('on',tr);$('fitN').textContent=state.trained.length;
   $('todayBtn').textContent=done?'✓ Hoy ya está tachado':'Tachar hoy';$('todayBtn').classList.toggle('done',done);
-  $('month').textContent=cap(view.toLocaleDateString('es-AR',{month:'long',year:'numeric'}));
+  $('month').textContent=view.toLocaleDateString('zh-CN',{year:'numeric',month:'long'});
   const grid=$('grid');grid.innerHTML='';
-  ['L','M','M','J','V','S','D'].forEach(x=>{const e=document.createElement('div');e.className='dow';e.textContent=x;grid.appendChild(e)});
+  ['一','二','三','四','五','六','日'].forEach(x=>{const e=document.createElement('div');e.className='dow';e.textContent=x;grid.appendChild(e)});
   const first=(view.getDay()+6)%7,days=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
   for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day empty';grid.appendChild(e)}
   const set=new Set(state.marked);
@@ -536,24 +445,24 @@ function renderFoco(){
   const s=fStreak(),g=state.goal,f=state.foco,tk=todayK();
   const goods=Object.values(f).filter(v=>v==='g').length,bads=Object.values(f).filter(v=>v==='b').length;
   $('streak').textContent=s;$('totalL').textContent='好 / 错';$('total').textContent=goods+' / '+bads;
-  $('goalTxt').textContent=g+' días';$('left').textContent=Math.max(0,g-s);
+  $('goalTxt').textContent=g+' 天';$('left').textContent=Math.max(0,g-s);
   $('arc').setAttribute('stroke','#7fb59a');$('arc').style.strokeDashoffset=276.5*(1-Math.min(1,s/g));
-  const q=message(s,g);$('qDay').textContent='Día '+q.n+(q.n>90?'':' de 90');$('msg').textContent=f[tk]==='b'?'Un 错 no borra lo que aprendiste. Mañana, día uno otra vez.':q.t;
+  const q=message(s,g);$('qDay').textContent='第 '+q.n+' 天'+(q.n>90?'':' / 90');$('msg').textContent=f[tk]==='b'?'一个“错”抹不掉你学到的东西。明天，重新开始第一天。':q.t;
   const endK=key(fEnd());
-  $('endTxt').textContent=parse(endK).toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
+  $('endTxt').textContent=parse(endK).toLocaleDateString('zh-CN',{month:'short',day:'numeric',weekday:'short'});
   // medallas foco
   const c=$('medals');c.innerHTML='';
   MEDALLAS.forEach(m=>{const on=state.fMedals.includes(m.d);const b=document.createElement('button');
     b.className='medal'+(on?' on':'');b.textContent=m.d;if(on)b.style.background=m.c;
-    b.onclick=()=>toast(on?(m.n+' · '+m.d+' días ✓'):(m.n+' · faltan '+Math.max(0,m.d-s)+' días'));c.appendChild(b)});
+    b.onclick=()=>toast(on?(m.n+' · '+m.d+' 天 ✓'):(m.n+' · 还差 '+Math.max(0,m.d-s)+' 天'));c.appendChild(b)});
   const tr=state.trained.includes(tk);$('fitBtn').classList.toggle('on',tr);$('fitN').textContent=state.trained.length;
   const tb=$('todayBtn');tb.classList.remove('done','fgood','fbad');
-  if(!f[tk])tb.textContent='Hoy fue 好';
-  else if(f[tk]==='g'){tb.textContent='✓ 好 hoy';tb.classList.add('fgood')}
-  else{tb.textContent='错 hoy';tb.classList.add('fbad')}
-  $('month').textContent=cap(view.toLocaleDateString('es-AR',{month:'long',year:'numeric'}));
+  if(!f[tk])tb.textContent='今天 好';
+  else if(f[tk]==='g'){tb.textContent='✓ 今天 好';tb.classList.add('fgood')}
+  else{tb.textContent='今天 错';tb.classList.add('fbad')}
+  $('month').textContent=view.toLocaleDateString('zh-CN',{year:'numeric',month:'long'});
   const grid=$('grid');grid.innerHTML='';
-  ['L','M','M','J','V','S','D'].forEach(x=>{const e=document.createElement('div');e.className='dow';e.textContent=x;grid.appendChild(e)});
+  ['一','二','三','四','五','六','日'].forEach(x=>{const e=document.createElement('div');e.className='dow';e.textContent=x;grid.appendChild(e)});
   const first=(view.getDay()+6)%7,days=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
   for(let i=0;i<first;i++){const e=document.createElement('div');e.className='day empty';grid.appendChild(e)}
   for(let d=1;d<=days;d++){
@@ -583,9 +492,9 @@ function checkMedals(celebrate){
 }
 function showMedal(m,foco){
   $('mBig').textContent=m.d;$('mBig').style.background=m.c;
-  $('mName').textContent=(foco?'Foco · ':'Medalla: ')+m.n;
+  $('mName').textContent='奖牌：'+m.n;
   const nx=MEDALLAS.find(x=>x.d>m.d);
-  $('mSub').textContent=m.d+' días seguidos.'+(nx?' Próxima: '+nx.d+' días.':' Completaste el camino.');
+  $('mSub').textContent='连续 '+m.d+' 天。'+(nx?'下一个：'+nx.d+' 天。':'你走完了全程。');
   $('medalSheet').classList.add('open');try{navigator.vibrate&&navigator.vibrate([30,60,30])}catch(e){}
 }
 $('mClose').onclick=()=>$('medalSheet').classList.remove('open');
@@ -600,7 +509,7 @@ function renderMedals(){
 }
 function toggleFit(k){
   const i=state.trained.indexOf(k);
-  if(i>=0)state.trained.splice(i,1);else{state.trained.push(k);try{navigator.vibrate&&navigator.vibrate(15)}catch(e){};toast('💪 Entrenamiento registrado')}
+  if(i>=0)state.trained.splice(i,1);else{state.trained.push(k);try{navigator.vibrate&&navigator.vibrate(15)}catch(e){};toast('💪 运动已记录')}
   state.trained.sort();save();render();
 }
 const EMOJIS=['😊','😌','😐','😔','😢','😡','😴','💪','❤️','🙏'];
@@ -637,28 +546,28 @@ function fmtT(s){return Math.floor(s/60)+':'+pad(Math.floor(s%60))}
 async function openDay(k){
   curDay=k;
   $('dayTitle').textContent=fmtLong(k);
-  $('daySub').textContent=k===todayK()?'Hoy':'';
+  $('daySub').textContent=k===todayK()?'今天':'';
   refreshDayToggle();
   await showMemo(k);
   $('daySheet').classList.add('open');
 }
-function refreshDayToggle(){const f=state.trained.includes(curDay);$('dayFit').textContent=f?'💪 Entrené ✓':'💪 Entrené';$('dayFit').style.color=f?'var(--ok)':'';$('dayFit').style.borderColor=f?'#2f4a3c':'';
+function refreshDayToggle(){const f=state.trained.includes(curDay);$('dayFit').textContent=f?'💪 运动了 ✓':'💪 运动了';$('dayFit').style.color=f?'var(--ok)':'';$('dayFit').style.borderColor=f?'#2f4a3c':'';
   const v=state.foco[curDay];
   $('dayGood').className=v==='g'?'primary':'';$('dayGood').textContent=v==='g'?'好 ✓':'好';
   $('dayBad').textContent=v==='b'?'错 ✓':'错';$('dayBad').style.background=v==='b'?'#2a1a1a':'';$('dayBad').style.color=v==='b'?'#e27b7b':'';
-  $('dayEmo').textContent='Reacción '+(state.moods[curDay]||'😊');}
+  $('dayEmo').textContent='心情 '+(state.moods[curDay]||'😊');}
 function setDay(k,v){if(state.foco[k]===v)delete state.foco[k];else state.foco[k]=v;fPop=k;save();fCheck(true);render();refreshDayToggle()}
 async function showMemo(k){
   const p=$('player');if(playURL){URL.revokeObjectURL(playURL);playURL=null}
   let m=null;try{if(idb)m=await getMemo(k)}catch(e){}
-  if(m&&m.blob){playURL=URL.createObjectURL(m.blob);p.src=playURL;p.hidden=false;$('memoActions').hidden=false;$('recTxt').innerHTML='<b>'+fmtT(m.dur||0)+'</b>Grabar de nuevo reemplaza este audio'}
-  else{p.removeAttribute('src');p.hidden=true;$('memoActions').hidden=true;$('recTxt').innerHTML='<b>0:00</b>Tocá para grabar (máx. 2 min)'}
+  if(m&&m.blob){playURL=URL.createObjectURL(m.blob);p.src=playURL;p.hidden=false;$('memoActions').hidden=false;$('recTxt').innerHTML='<b>'+fmtT(m.dur||0)+'</b>重新录音会替换这段录音'}
+  else{p.removeAttribute('src');p.hidden=true;$('memoActions').hidden=true;$('recTxt').innerHTML='<b>0:00</b>点一下开始录音（最多 2 分钟）'}
 }
 function pickType(){const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];for(const t of c){try{if(MediaRecorder.isTypeSupported(t))return t}catch(e){}}return ''}
 async function startRec(){
-  if(!idb){toast('Este navegador no permite guardar audios');return}
-  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Grabación no disponible en este navegador');return}
-  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('Necesito permiso de micrófono');return}
+  if(!idb){toast('这个浏览器不能保存录音');return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('这个浏览器不能录音');return}
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('需要麦克风权限');return}
   const type=pickType();
   try{rec=type?new MediaRecorder(stream,{mimeType:type}):new MediaRecorder(stream)}catch(e){rec=new MediaRecorder(stream)}
   chunks=[];const day=curDay;
@@ -667,27 +576,27 @@ async function startRec(){
     clearInterval(recTimer);stream.getTracks().forEach(t=>t.stop());
     $('recBtn').classList.remove('on');
     const dur=(Date.now()-recStart)/1000;
-    if(!chunks.length||dur<0.5){toast('Grabación muy corta');showMemo(day);return}
+    if(!chunks.length||dur<0.5){toast('录音太短');showMemo(day);return}
     const blob=new Blob(chunks,{type:rec.mimeType||type||'audio/webm'});
-    try{await putMemo(day,{blob,dur,at:Date.now()});audioDays.add(day);toast('Memoria guardada');render();if(curDay===day)showMemo(day)}
-    catch(e){toast('No se pudo guardar el audio')}
+    try{await putMemo(day,{blob,dur,at:Date.now()});audioDays.add(day);toast('录音已保存');render();if(curDay===day)showMemo(day)}
+    catch(e){toast('录音保存失败')}
   };
   rec.start(250);recStart=Date.now();$('recBtn').classList.add('on');
   $('player').pause();
-  recTimer=setInterval(()=>{const s=(Date.now()-recStart)/1000;$('recTxt').innerHTML='<b>'+fmtT(s)+'</b>Grabando… tocá para parar';if(s>=MAX)stopRec()},250);
+  recTimer=setInterval(()=>{const s=(Date.now()-recStart)/1000;$('recTxt').innerHTML='<b>'+fmtT(s)+'</b>录音中… 点一下停止';if(s>=MAX)stopRec()},250);
 }
 function stopRec(){if(rec&&rec.state==='recording')rec.stop()}
 $('recBtn').onclick=()=>{if(rec&&rec.state==='recording')stopRec();else startRec()};
 $('delMemo').onclick=async e=>{
-  const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}
-  b.dataset.c='';b.textContent='Borrar audio';
-  try{await delMemo(curDay);audioDays.delete(curDay);render();showMemo(curDay);toast('Audio borrado')}catch(err){}
+  const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='再点一下确认';return}
+  b.dataset.c='';b.textContent='删除录音';
+  try{await delMemo(curDay);audioDays.delete(curDay);render();showMemo(curDay);toast('录音已删除')}catch(err){}
 };
 $('dayGood').onclick=()=>setDay(curDay,'g');
 $('dayBad').onclick=()=>setDay(curDay,'b');
 $('dayEmo').onclick=()=>{closeDay();openEmo(curDay)};
 $('dayFit').onclick=()=>{toggleFit(curDay);refreshDayToggle()};
-function closeDay(){stopRec();$('player').pause();$('daySheet').classList.remove('open');$('delMemo').dataset.c='';$('delMemo').textContent='Borrar audio'}
+function closeDay(){stopRec();$('player').pause();$('daySheet').classList.remove('open');$('delMemo').dataset.c='';$('delMemo').textContent='删除录音'}
 $('closeDay').onclick=closeDay;
 $('daySheet').onclick=e=>{if(e.target.id==='daySheet')closeDay()};
 
@@ -698,19 +607,19 @@ $('fitBtn').onclick=()=>toggleFit(todayK());
 $('jumpEnd').onclick=()=>{const e=fEnd();view=new Date(e.getFullYear(),e.getMonth(),1);render()};
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
-$('title').onchange=e=>{state.title=e.target.value.trim()||'Un día a la vez';save();render()};
-$('openSet').onclick=()=>{renderSosSettings();for(let i=0;i<5;i++)$('r'+i).value=state.reasons[i]||'';$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='Borrar todos los tachados';$('setSheet').classList.add('open')};
+$('title').onchange=e=>{state.title=e.target.value.trim()||'一天一天';save();render()};
+$('openSet').onclick=()=>{renderSosSettings();for(let i=0;i<5;i++)$('r'+i).value=state.reasons[i]||'';$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='清除所有记录';$('setSheet').classList.add('open')};
 $('closeSet').onclick=()=>{sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')};
 $('setSheet').onclick=e=>{if(e.target.id==='setSheet'){sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')}};
 $('saveSet').onclick=()=>{state.reasons=[0,1,2,3,4].map(i=>$('r'+i).value.trim()).filter(Boolean);if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0){state.goal=g;state.goalSet=true}save();render();$('setSheet').classList.remove('open')};
-$('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}state.marked=[];save();render();$('setSheet').classList.remove('open')};
+$('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='再点一下确认';return}state.marked=[];state.foco={};save();render();$('setSheet').classList.remove('open')};
 $('exportBtn').onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='tachar-dias-respaldo-'+todayK()+'.json';document.body.appendChild(a);a.click();a.remove();
-  toast('Respaldo descargado (sin audios)');
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='yitian-backup-'+todayK()+'.json';document.body.appendChild(a);a.click();a.remove();
+  toast('备份已下载（不含录音）');
 };
 $('importBtn').onclick=()=>$('importIn').click();
-$('importIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{merge(JSON.parse(await f.text()));save();render();toast('Respaldo importado')}catch(err){toast('Archivo inválido')}e.target.value=''};
+$('importIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{merge(JSON.parse(await f.text()));save();render();toast('备份已导入')}catch(err){toast('文件无效')}e.target.value=''};
 
 /* ---- SOS ---- */
 const SOSK='__sos__';
@@ -718,13 +627,13 @@ let sosURL=null,sosPlayURL=null,sRec=null,sChunks=[],sStart=0,sTimer=null,sStrea
 async function renderSosSettings(){
   const p=$('sosPlayer');if(sosURL){URL.revokeObjectURL(sosURL);sosURL=null}
   let m=null;try{if(idb)m=await getMemo(SOSK)}catch(e){}
-  if(m&&m.blob){sosURL=URL.createObjectURL(m.blob);p.src=sosURL;p.hidden=false;$('sosActions').hidden=false;$('sosTxt').innerHTML='<b>'+fmtT(m.dur||0)+'</b>Grabar de nuevo lo reemplaza'}
-  else{p.removeAttribute('src');p.hidden=true;$('sosActions').hidden=true;$('sosTxt').innerHTML='<b>0:00</b>Tocá para grabar (máx. 2 min)'}
+  if(m&&m.blob){sosURL=URL.createObjectURL(m.blob);p.src=sosURL;p.hidden=false;$('sosActions').hidden=false;$('sosTxt').innerHTML='<b>'+fmtT(m.dur||0)+'</b>重新录音会替换它'}
+  else{p.removeAttribute('src');p.hidden=true;$('sosActions').hidden=true;$('sosTxt').innerHTML='<b>0:00</b>点一下开始录音（最多 2 分钟）'}
 }
 async function sosStart(){
-  if(!idb){toast('Este navegador no permite guardar audios');return}
-  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Grabación no disponible');return}
-  try{sStream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('Necesito permiso de micrófono');return}
+  if(!idb){toast('这个浏览器不能保存录音');return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('不能录音');return}
+  try{sStream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('需要麦克风权限');return}
   const type=pickType();
   try{sRec=type?new MediaRecorder(sStream,{mimeType:type}):new MediaRecorder(sStream)}catch(e){sRec=new MediaRecorder(sStream)}
   sChunks=[];
@@ -732,36 +641,36 @@ async function sosStart(){
   sRec.onstop=async()=>{
     clearInterval(sTimer);sStream.getTracks().forEach(t=>t.stop());$('sosRec').classList.remove('on');
     const dur=(Date.now()-sStart)/1000;
-    if(!sChunks.length||dur<0.5){toast('Grabación muy corta');renderSosSettings();return}
-    try{await putMemo(SOSK,{blob:new Blob(sChunks,{type:sRec.mimeType||type||'audio/webm'}),dur,at:Date.now()});toast('Audio SOS guardado');renderSosSettings()}catch(e){toast('No se pudo guardar')}
+    if(!sChunks.length||dur<0.5){toast('录音太短');renderSosSettings();return}
+    try{await putMemo(SOSK,{blob:new Blob(sChunks,{type:sRec.mimeType||type||'audio/webm'}),dur,at:Date.now()});toast('SOS 录音已保存');renderSosSettings()}catch(e){toast('保存失败')}
   };
   sRec.start(250);sStart=Date.now();$('sosRec').classList.add('on');$('sosPlayer').pause();
-  sTimer=setInterval(()=>{const t=(Date.now()-sStart)/1000;$('sosTxt').innerHTML='<b>'+fmtT(t)+'</b>Grabando… tocá para parar';if(t>=MAX)sosStop()},250);
+  sTimer=setInterval(()=>{const t=(Date.now()-sStart)/1000;$('sosTxt').innerHTML='<b>'+fmtT(t)+'</b>录音中… 点一下停止';if(t>=MAX)sosStop()},250);
 }
 function sosStop(){if(sRec&&sRec.state==='recording')sRec.stop()}
 $('sosRec').onclick=()=>{if(sRec&&sRec.state==='recording')sosStop();else sosStart()};
-$('sosDel').onclick=async e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}b.dataset.c='';b.textContent='Borrar audio SOS';try{await delMemo(SOSK);renderSosSettings();toast('Audio SOS borrado')}catch(err){}};
+$('sosDel').onclick=async e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='再点一下确认';return}b.dataset.c='';b.textContent='删除 SOS 录音';try{await delMemo(SOSK);renderSosSettings();toast('SOS 录音已删除')}catch(err){}};
 async function openSos(){
-  const n=fStreak();$('sosN').textContent=n;$('sosNl').textContent=n===1?'día de racha':'días de racha';
+  const n=fStreak();$('sosN').textContent=n;$('sosNl').textContent='连续天数';
   const ul=$('sosReasons');ul.innerHTML='';
   if(state.reasons.length){state.reasons.forEach(r=>{const li=document.createElement('li');li.textContent=r;ul.appendChild(li)});$('sosQ').textContent=''}
   else{$('sosQ').textContent=FRASES[(dayNum()-1)%FRASES.length]}
   const a=$('sosPlay');if(sosPlayURL){URL.revokeObjectURL(sosPlayURL);sosPlayURL=null}
   let m=null;try{if(idb)m=await getMemo(SOSK)}catch(e){}
   $('sos').classList.add('open');try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}
-  if(m&&m.blob){sosPlayURL=URL.createObjectURL(m.blob);a.src=sosPlayURL;a.hidden=false;$('sosLabel').textContent='Tu mensaje para este momento';try{await a.play()}catch(e){}}
-  else{a.hidden=true;a.removeAttribute('src');$('sosLabel').textContent='Todavía no grabaste tu audio SOS. Hacelo en ⚙ cuando estés tranquilo.'}
+  if(m&&m.blob){sosPlayURL=URL.createObjectURL(m.blob);a.src=sosPlayURL;a.hidden=false;$('sosLabel').textContent='给这个时刻的你';try{await a.play()}catch(e){}}
+  else{a.hidden=true;a.removeAttribute('src');$('sosLabel').textContent='你还没有录 SOS。平静的时候在 ⚙ 里录一段。'}
 }
 function closeSos(){$('sosPlay').pause();$('sos').classList.remove('open')}
 $('openSos').onclick=openSos;
-$('sosOk').onclick=()=>{closeSos();toast('Bien ahí. Racha intacta 💪')};
+$('sosOk').onclick=()=>{closeSos();toast('做得好。连续记录保住了 💪')};
 $('sosBreath').onclick=()=>{closeSos();bMin=2;bOpts();bStop(false);$('breath').classList.add('open');bStart()};
 
 /* ---- respiración ---- */
 const PATRONES=[
- {id:'calma',n:'Calma 4-6',d:'Inhalá 4, exhalá 6. Baja la ansiedad.',f:[['Inhalá',4,1],['Exhalá',6,0]]},
- {id:'caja',n:'Caja 4-4-4-4',d:'Ritmo parejo para ordenar la cabeza.',f:[['Inhalá',4,1],['Sostené',4,1],['Exhalá',4,0],['Sostené',4,0]]},
- {id:'478',n:'4-7-8',d:'Para relajarte o dormir.',f:[['Inhalá',4,1],['Sostené',7,1],['Exhalá',8,0]]}
+ {id:'calma',n:'平静 4-6',d:'吸气 4 秒，呼气 6 秒。缓解焦虑。',f:[['吸气',4,1],['呼气',6,0]]},
+ {id:'caja',n:'方块 4-4-4-4',d:'均匀的节奏，整理思绪。',f:[['吸气',4,1],['屏住',4,1],['呼气',4,0],['屏住',4,0]]},
+ {id:'478',n:'4-7-8',d:'放松，或者帮助入睡。',f:[['吸气',4,1],['屏住',7,1],['呼气',8,0]]}
 ];
 const DURS=[1,3,5,10];
 const MED_GOAL=600;
@@ -772,7 +681,7 @@ function renderMed(){
   const done=left===0;
   $('medN').textContent=done?'✓':Math.ceil(left/60);
   $('openBreath').classList.toggle('on',done);
-  $('bToday').textContent=done?'Meta de hoy cumplida: '+Math.floor(d/60)+' min ✓':'Hoy: '+Math.floor(d/60)+' de 10 min · faltan '+fmtT(left);
+  $('bToday').textContent=done?'今天的目标完成了：'+Math.floor(d/60)+' 分钟 ✓':'今天：'+Math.floor(d/60)+' / 10 分钟 · 还剩 '+fmtT(left);
 }
 function medCommit(){
   if(!bRun||!bRun.st)return;
@@ -781,32 +690,32 @@ function medCommit(){
 }
 function bOpts(){
   $('bPat').innerHTML='';PATRONES.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;if(p===bPat)b.className='sel';b.onclick=()=>{if(bRun)return;bPat=p;bOpts()};$('bPat').appendChild(b)});
-  $('bDur').innerHTML='';DURS.forEach(m=>{const b=document.createElement('button');b.textContent=m+' min';if(m===bMin)b.className='sel';b.onclick=()=>{if(bRun)return;bMin=m;bOpts()};$('bDur').appendChild(b)});
+  $('bDur').innerHTML='';DURS.forEach(m=>{const b=document.createElement('button');b.textContent=m+' 分钟';if(m===bMin)b.className='sel';b.onclick=()=>{if(bRun)return;bMin=m;bOpts()};$('bDur').appendChild(b)});
   $('bDesc').textContent=bPat.d;
 }
 function bStop(done){
   if(bRun){medCommit();clearTimeout(bRun.t);clearInterval(bRun.i)}bRun=null;renderMed();
   const c=$('bCircle');c.style.transition='transform .8s ease';c.style.transform='scale(.45)';
-  $('bPhase').textContent=done?'Bien hecho':'Listo';$('bCount').textContent='';$('bLeft').textContent='';
-  $('bStart').textContent='Empezar';
-  if(done){toast('Respiración completa 🌿');try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
+  $('bPhase').textContent=done?'做得好':'准备';$('bCount').textContent='';$('bLeft').textContent='';
+  $('bStart').textContent='开始';
+  if(done){toast('呼吸练习完成 🌿');try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
 }
 function bStart(){
   if(bRun){bStop(false);return}
   const end=Date.now()+bMin*60000;let idx=0;bRun={st:Date.now()};
-  $('bStart').textContent='Parar';
+  $('bStart').textContent='停止';
   const c=$('bCircle');
   const step=()=>{
     if(!bRun)return;
     if(Date.now()>=end&&idx%bPat.f.length===0){bStop(true);return}
     const [name,sec,big]=bPat.f[idx%bPat.f.length];
     $('bPhase').textContent=name;
-    c.style.transition=name==='Sostené'?'none':'transform '+sec+'s ease-in-out';
+    c.style.transition=name==='屏住'?'none':'transform '+sec+'s ease-in-out';
     c.style.transform=big?'scale(1)':'scale(.45)';
     try{navigator.vibrate&&navigator.vibrate(20)}catch(e){}
     let left=sec;$('bCount').textContent=left;
-    clearInterval(bRun.i);bRun.i=setInterval(()=>{left--;renderMed();if(left>0)$('bCount').textContent=left;const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent=r>0?('Quedan '+fmtT(r)):'Terminando el ciclo…'},1000);
-    const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent='Quedan '+fmtT(r);
+    clearInterval(bRun.i);bRun.i=setInterval(()=>{left--;renderMed();if(left>0)$('bCount').textContent=left;const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent=r>0?('还剩 '+fmtT(r)):'正在完成这一轮…'},1000);
+    const r=Math.max(0,Math.ceil((end-Date.now())/1000));$('bLeft').textContent='还剩 '+fmtT(r);
     idx++;bRun.t=setTimeout(step,sec*1000);
   };
   step();

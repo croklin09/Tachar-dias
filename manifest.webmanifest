@@ -1,8 +1,8 @@
 {
-  "name": "Un día a la vez",
-  "short_name": "Un día",
-  "description": "Calendario para tachar días, con racha, meta y una memoria de audio por día.",
-  "lang": "es-AR",
+  "name": "一天一天",
+  "short_name": "一天一天",
+  "description": "一天一天：好/错记录、奖牌、冥想和每日录音。",
+  "lang": "zh-CN",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
