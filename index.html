@@ -303,7 +303,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 15</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 16</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -835,13 +835,29 @@ const PUNCH={'1':'刺拳','2':'直拳','3':'前勾拳','4':'后勾拳','5':'前�
 const SAY={'1':'一','2':'二','3':'三','4':'四','5':'五','6':'六','闪':'闪','潜':'潜'};
 const COMBOS=[['1'],['1','2'],['1','1','2'],['1','2','3'],['2','3','2'],['1','2','3','2'],['1','6','3','2'],['闪','2','3'],['1','2','潜','2'],['3','2'],['1','2','5','2'],['6','3','2'],['1','3','2'],['2','闪','2'],['1','2','3','4'],['5','2','3'],['1','1','2','潜','3','2'],['4','3','2']];
 const BX={on:false,end:0,dur:2,n:0,timer:null,next:null,voice:true};
-function bxSay(txt){if(!BX.voice)return;try{const sy=window.speechSynthesis;if(!sy)return;sy.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='zh-CN';u.rate=1.25;sy.speak(u)}catch(e){}}
+// Voz: chino si el teléfono tiene voz china; si no, español; si no hay voces, pitidos
+const SAY_ES={'1':'uno','2':'dos','3':'tres','4':'cuatro','5':'cinco','6':'seis','闪':'esquiva','潜':'abajo'};
+let VOICE=null,VLANG='beep';
+function pickVoice(){try{const vs=speechSynthesis.getVoices()||[];
+  const zh=vs.find(v=>/^zh(-|_)?(CN|Hans)?/i.test(v.lang))||vs.find(v=>/^(zh|cmn)/i.test(v.lang));
+  const es=vs.find(v=>/^es/i.test(v.lang));
+  if(zh){VOICE=zh;VLANG='zh'}else if(es){VOICE=es;VLANG='es'}else{VOICE=null;VLANG=vs.length?'other':'beep'}
+  const b=document.getElementById('bxVoice');if(b&&BX.voice)b.textContent='声音 '+({zh:'中文',es:'西语',other:'开',beep:'哔'}[VLANG]);
+}catch(e){VLANG='beep'}}
+try{if(window.speechSynthesis){pickVoice();speechSynthesis.addEventListener('voiceschanged',pickVoice)}}catch(e){}
+function bxSpeak(text,lang){const sy=window.speechSynthesis;sy.cancel();const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:lang;u.rate=1.2;sy.speak(u)}
+function bxSayCombo(c){if(!BX.voice)return;try{
+  if(!window.speechSynthesis||VLANG==='beep'){c.forEach((_,i)=>setTimeout(bxBeep,i*260));return}
+  if(VLANG==='zh')bxSpeak(c.map(x=>SAY[x]).join('，'),'zh-CN');else bxSpeak(c.map(x=>SAY_ES[x]).join(', '),'es-AR');
+}catch(e){c.forEach((_,i)=>setTimeout(bxBeep,i*260))}}
+function bxSay(txt,es){if(!BX.voice)return;try{if(!window.speechSynthesis||VLANG==='beep'){bxBeep();return}
+  if(VLANG==='zh')bxSpeak(txt,'zh-CN');else bxSpeak(es||txt,'es-AR')}catch(e){bxBeep()}}
 function bxBeep(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;BX.ac=BX.ac||new C();const o=BX.ac.createOscillator(),g=BX.ac.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(BX.ac.destination);o.start();o.stop(BX.ac.currentTime+.12)}catch(e){}}
 function bxShow(c){
   const el=$('bxCombo');el.textContent=c.join(' ');el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
   $('bxNames').textContent=c.map(x=>PUNCH[x]).join('，');BX.n++;$('bxN').textContent=BX.n;
   try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}
-  bxSay(c.map(x=>SAY[x]).join(' '));
+  bxSayCombo(c);
 }
 function bxLoop(){
   if(!BX.on)return;
@@ -854,16 +870,17 @@ function bxTick(){const left=Math.max(0,BX.end-Date.now());$('bxTime').textConte
 function bxStart(){
   if(BX.on){bxStop(false);return}
   BX.on=true;BX.n=0;$('bxN').textContent=0;BX.end=Date.now()+BX.dur*60000;$('bxStart').textContent='停止';
-  bxBeep();bxSay('开始');clearInterval(BX.timer);BX.timer=setInterval(bxTick,250);bxTick();BX.next=setTimeout(bxLoop,1500);
+  bxBeep();bxSay('开始','vamos');clearInterval(BX.timer);BX.timer=setInterval(bxTick,250);bxTick();BX.next=setTimeout(bxLoop,1500);
 }
 function bxStop(done){
   BX.on=false;clearInterval(BX.timer);clearTimeout(BX.next);try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}
   $('bxStart').textContent='开始';
-  if(done){$('bxCombo').textContent='好！';$('bxNames').textContent=BX.n+' 个组合。连续 '+fStreak()+' 天。';bxBeep();bxSay('结束，做得好');try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
+  if(done){$('bxCombo').textContent='好！';$('bxNames').textContent=BX.n+' 个组合。连续 '+fStreak()+' 天。';bxBeep();bxSay('结束，做得好','tiempo, bien hecho');try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
   else{$('bxCombo').textContent='准备';$('bxNames').textContent='站好，双手护脸'}
 }
 function bxDurOpts(){const c=$('bxDur');c.innerHTML='';[1,2,3].forEach(m=>{const b=document.createElement('button');b.type='button';b.textContent=m+' 分钟';if(m===BX.dur)b.className='sel';b.onclick=()=>{if(BX.on)return;BX.dur=m;$('bxTime').textContent=fmtT(m*60);bxDurOpts()};c.appendChild(b)})}
 function openBoxer(){
+  try{pickVoice()}catch(e){}
   $('boxer').classList.add('open');
   try{closeSos()}catch(e){}
   try{bxDurOpts();bxStop(false);$('bxTime').textContent=fmtT(BX.dur*60);$('bxBar').style.transform='scaleX(1)'}catch(e){toast('错误: '+e.message)}
@@ -871,7 +888,7 @@ function openBoxer(){
 $('sosFight').addEventListener('click',openBoxer);
 $('bxStart').onclick=bxStart;
 $('bxClose').onclick=()=>{const done=!BX.on&&BX.n>0;bxStop(false);$('boxer').classList.remove('open');if(done)toast('过去了吗？连续 '+fStreak()+' 天')};
-$('bxVoice').onclick=()=>{BX.voice=!BX.voice;$('bxVoice').textContent=BX.voice?'声音 开':'声音 关';$('bxVoice').setAttribute('aria-pressed',String(BX.voice));if(!BX.voice)try{speechSynthesis.cancel()}catch(e){}};
+$('bxVoice').onclick=()=>{BX.voice=!BX.voice;if(BX.voice)pickVoice();else $('bxVoice').textContent='声音 关';$('bxVoice').setAttribute('aria-pressed',String(BX.voice));if(!BX.voice)try{speechSynthesis.cancel()}catch(e){}};
 
 /* ---- respiración ---- */
 const PATRONES=[
