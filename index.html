@@ -143,6 +143,7 @@
   .day.pop .hz{animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
   .btn.fgood{background:#1f2a25;color:var(--ok);border:1px solid #2f4a3c}
   .btn.fbad{background:#2a1a1a;color:#e27b7b;border:1px solid #4a2a2a}
+  [hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -154,7 +155,6 @@
   </header>
 
   <section class="stats">
-    <div class="tabs"><button id="tabDist">Distancia</button><button id="tabFoco">Foco 好</button></div>
     <div class="ring">
       <svg viewBox="0 0 104 104">
         <circle cx="52" cy="52" r="44" stroke="#2a2e36" stroke-width="9" fill="none"/>
@@ -186,7 +186,7 @@
       <button id="next" aria-label="Mes siguiente">›</button>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="legend">Mantené apretado un día para reaccionar<br>● inicio · <span style="color:var(--accent2)">●</span> audio · <span style="color:var(--ok)">▬</span> entreno · 🏁 final · <button class="link" id="jumpEnd">ir al final</button></div>
+    <div class="legend">Tocá: 好 → 错 → borrar · Mantené apretado: detalles<br><span style="color:var(--accent2)">●</span> audio · <span style="color:var(--ok)">▬</span> entreno · 🏁 final · <button class="link" id="jumpEnd">ir al final</button></div>
   </section>
 </div>
 
@@ -195,7 +195,8 @@
   <div class="panel">
     <h3 id="dayTitle"></h3>
     <p class="sub" id="daySub"></p>
-    <div class="row" style="margin-top:0"><button class="primary" id="dayToggle"></button><button id="dayFit"></button></div>
+    <div class="row" style="margin-top:0"><button id="dayGood">好</button><button id="dayBad">错</button><button id="dayFit"></button></div>
+    <div class="row" style="margin-top:8px"><button id="dayEmo">Reacción 😊</button></div>
     <div class="memo">
       <h4>Memoria del día</h4>
       <div class="rec">
@@ -405,7 +406,9 @@ let view=new Date(); view.setDate(1);
 let lastAnim=null, curDay=null;
 
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200)}
-function load(){try{const o=JSON.parse(localStorage.getItem(LS)||'null');if(o)merge(o)}catch(e){}}
+function load(){try{const o=JSON.parse(localStorage.getItem(LS)||'null');if(o)merge(o)}catch(e){}
+  if(state.marked.length){state.marked.forEach(k=>{if(!state.foco[k])state.foco[k]='g'});state.marked=[]}
+  state.fMedals=[...new Set([...state.fMedals,...state.medals])];state.mode='foco';save()}
 function save(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('No se pudo guardar')}}
 function merge(o){
   if(!o||typeof o!=='object')return;
@@ -476,7 +479,7 @@ function fEnd(){const d=new Date();const s=fStreak();const st=new Date();
 function fCheck(celebrate){
   const b=Math.max(fBest(),fStreak());const nuevas=[];
   MEDALLAS.forEach(m=>{if(b>=m.d&&!state.fMedals.includes(m.d)){state.fMedals.push(m.d);nuevas.push(m)}});
-  if(nuevas.length){save();if(celebrate)showMedal(nuevas[nuevas.length-1],true)}
+  if(nuevas.length){save();if(celebrate)showMedal(nuevas[nuevas.length-1])}
 }
 let fPop=null;
 function fCycle(k){
@@ -487,10 +490,8 @@ function fCycle(k){
   fPop=k;save();fCheck(true);render();
 }
 function setMode(m){state.mode=m;save();render()}
-$('tabDist').onclick=()=>setMode('dist');
-$('tabFoco').onclick=()=>setMode('foco');
 function render(){
-  if(state.mode==='foco')return renderFoco();
+  return renderFoco();
   document.body.classList.remove('foco');$('tabDist').className='sel';$('tabFoco').className='';
   $('totalL').textContent='Tachados';$('todayBtn').classList.remove('fgood','fbad');$('arc').setAttribute('stroke','#e8735a');
   $('title').value=state.title;
@@ -530,21 +531,21 @@ function render(){
   lastAnim=null;
 }
 function renderFoco(){
-  document.body.classList.add('foco');$('tabDist').className='';$('tabFoco').className='sel';
+
   $('title').value=state.title;renderMed();
   const s=fStreak(),g=state.goal,f=state.foco,tk=todayK();
   const goods=Object.values(f).filter(v=>v==='g').length,bads=Object.values(f).filter(v=>v==='b').length;
-  $('streak').textContent=s;$('totalL').textContent='Días 好 / 错';$('total').textContent=goods+' / '+bads;
+  $('streak').textContent=s;$('totalL').textContent='好 / 错';$('total').textContent=goods+' / '+bads;
   $('goalTxt').textContent=g+' días';$('left').textContent=Math.max(0,g-s);
   $('arc').setAttribute('stroke','#7fb59a');$('arc').style.strokeDashoffset=276.5*(1-Math.min(1,s/g));
-  $('qDay').textContent='Foco · racha '+s;$('msg').textContent=f[tk]==='b'?'Un 错 no borra lo que aprendiste. Mañana, día uno otra vez.':_oldMessage(s,g);
+  const q=message(s,g);$('qDay').textContent='Día '+q.n+(q.n>90?'':' de 90');$('msg').textContent=f[tk]==='b'?'Un 错 no borra lo que aprendiste. Mañana, día uno otra vez.':q.t;
   const endK=key(fEnd());
   $('endTxt').textContent=parse(endK).toLocaleDateString('es-AR',{weekday:'short',day:'numeric',month:'short'});
   // medallas foco
   const c=$('medals');c.innerHTML='';
   MEDALLAS.forEach(m=>{const on=state.fMedals.includes(m.d);const b=document.createElement('button');
     b.className='medal'+(on?' on':'');b.textContent=m.d;if(on)b.style.background=m.c;
-    b.onclick=()=>toast('Foco · '+(on?(m.n+' ✓'):(m.n+' · faltan '+Math.max(0,m.d-s)+' días')));c.appendChild(b)});
+    b.onclick=()=>toast(on?(m.n+' · '+m.d+' días ✓'):(m.n+' · faltan '+Math.max(0,m.d-s)+' días'));c.appendChild(b)});
   const tr=state.trained.includes(tk);$('fitBtn').classList.toggle('on',tr);$('fitN').textContent=state.trained.length;
   const tb=$('todayBtn');tb.classList.remove('done','fgood','fbad');
   if(!f[tk])tb.textContent='Hoy fue 好';
@@ -564,6 +565,7 @@ function renderFoco(){
     if(k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
     if(state.moods[k])e.insertAdjacentHTML('beforeend','<span class="emo">'+state.moods[k]+'</span>');
     if(state.trained.includes(k))e.insertAdjacentHTML('beforeend','<span class="fit"></span>');
+    if(audioDays.has(k))e.insertAdjacentHTML('beforeend','<span class="mic"></span>');
     if(k<=tk)bindDay(e,k);
     grid.appendChild(e);
   }
@@ -616,11 +618,11 @@ $('emoSheet').onclick=e=>{if(e.target.id==='emoSheet')$('emoSheet').classList.re
 function bindDay(e,k){
   let t=null,long=false,sx=0,sy=0;
   const cancel=()=>{clearTimeout(t);t=null;e.classList.remove('press')};
-  e.addEventListener('pointerdown',ev=>{long=false;sx=ev.clientX;sy=ev.clientY;e.classList.add('press');t=setTimeout(()=>{long=true;e.classList.remove('press');openEmo(k)},450)});
+  e.addEventListener('pointerdown',ev=>{long=false;sx=ev.clientX;sy=ev.clientY;e.classList.add('press');t=setTimeout(()=>{long=true;e.classList.remove('press');try{navigator.vibrate&&navigator.vibrate(25)}catch(_){};openDay(k)},450)});
   e.addEventListener('pointermove',ev=>{if(t&&(Math.abs(ev.clientX-sx)>10||Math.abs(ev.clientY-sy)>10))cancel()});
   e.addEventListener('pointerup',cancel);e.addEventListener('pointerleave',cancel);e.addEventListener('pointercancel',cancel);
   e.addEventListener('contextmenu',ev=>ev.preventDefault());
-  e.addEventListener('click',()=>{if(long){long=false;return}if(state.mode==='foco')fCycle(k);else openDay(k)});
+  e.addEventListener('click',()=>{if(long){long=false;return}fCycle(k)});
 }
 function toggle(k){
   const i=state.marked.indexOf(k);
@@ -641,7 +643,11 @@ async function openDay(k){
   $('daySheet').classList.add('open');
 }
 function refreshDayToggle(){const f=state.trained.includes(curDay);$('dayFit').textContent=f?'💪 Entrené ✓':'💪 Entrené';$('dayFit').style.color=f?'var(--ok)':'';$('dayFit').style.borderColor=f?'#2f4a3c':'';
-  const m=state.marked.includes(curDay);$('dayToggle').textContent=m?'Destachar este día':'Tachar este día';$('dayToggle').className=m?'':'primary'}
+  const v=state.foco[curDay];
+  $('dayGood').className=v==='g'?'primary':'';$('dayGood').textContent=v==='g'?'好 ✓':'好';
+  $('dayBad').textContent=v==='b'?'错 ✓':'错';$('dayBad').style.background=v==='b'?'#2a1a1a':'';$('dayBad').style.color=v==='b'?'#e27b7b':'';
+  $('dayEmo').textContent='Reacción '+(state.moods[curDay]||'😊');}
+function setDay(k,v){if(state.foco[k]===v)delete state.foco[k];else state.foco[k]=v;fPop=k;save();fCheck(true);render();refreshDayToggle()}
 async function showMemo(k){
   const p=$('player');if(playURL){URL.revokeObjectURL(playURL);playURL=null}
   let m=null;try{if(idb)m=await getMemo(k)}catch(e){}
@@ -677,17 +683,19 @@ $('delMemo').onclick=async e=>{
   b.dataset.c='';b.textContent='Borrar audio';
   try{await delMemo(curDay);audioDays.delete(curDay);render();showMemo(curDay);toast('Audio borrado')}catch(err){}
 };
-$('dayToggle').onclick=()=>{toggle(curDay);refreshDayToggle()};
+$('dayGood').onclick=()=>setDay(curDay,'g');
+$('dayBad').onclick=()=>setDay(curDay,'b');
+$('dayEmo').onclick=()=>{closeDay();openEmo(curDay)};
 $('dayFit').onclick=()=>{toggleFit(curDay);refreshDayToggle()};
 function closeDay(){stopRec();$('player').pause();$('daySheet').classList.remove('open');$('delMemo').dataset.c='';$('delMemo').textContent='Borrar audio'}
 $('closeDay').onclick=closeDay;
 $('daySheet').onclick=e=>{if(e.target.id==='daySheet')closeDay()};
 
 /* ---- UI general ---- */
-$('todayBtn').onclick=()=>{const k=todayK();if(state.mode==='foco'){fCycle(k);return}if(!state.marked.includes(k))toggle(k)};
+$('todayBtn').onclick=()=>fCycle(todayK());
 $('todayMemo').onclick=()=>openDay(todayK());
 $('fitBtn').onclick=()=>toggleFit(todayK());
-$('jumpEnd').onclick=()=>{const e=endDay();view=new Date(e.getFullYear(),e.getMonth(),1);render()};
+$('jumpEnd').onclick=()=>{const e=fEnd();view=new Date(e.getFullYear(),e.getMonth(),1);render()};
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
 $('title').onchange=e=>{state.title=e.target.value.trim()||'Un día a la vez';save();render()};
@@ -734,7 +742,7 @@ function sosStop(){if(sRec&&sRec.state==='recording')sRec.stop()}
 $('sosRec').onclick=()=>{if(sRec&&sRec.state==='recording')sosStop();else sosStart()};
 $('sosDel').onclick=async e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Tocá de nuevo para confirmar';return}b.dataset.c='';b.textContent='Borrar audio SOS';try{await delMemo(SOSK);renderSosSettings();toast('Audio SOS borrado')}catch(err){}};
 async function openSos(){
-  const n=state.mode==='foco'?fStreak():streak();$('sosN').textContent=n;$('sosNl').textContent=n===1?'día de racha':'días de racha';
+  const n=fStreak();$('sosN').textContent=n;$('sosNl').textContent=n===1?'día de racha':'días de racha';
   const ul=$('sosReasons');ul.innerHTML='';
   if(state.reasons.length){state.reasons.forEach(r=>{const li=document.createElement('li');li.textContent=r;ul.appendChild(li)});$('sosQ').textContent=''}
   else{$('sosQ').textContent=FRASES[(dayNum()-1)%FRASES.length]}
