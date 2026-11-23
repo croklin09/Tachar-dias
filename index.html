@@ -303,7 +303,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 16</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 17</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -842,17 +842,29 @@ function pickVoice(){try{const vs=speechSynthesis.getVoices()||[];
   const zh=vs.find(v=>/^zh(-|_)?(CN|Hans)?/i.test(v.lang))||vs.find(v=>/^(zh|cmn)/i.test(v.lang));
   const es=vs.find(v=>/^es/i.test(v.lang));
   if(zh){VOICE=zh;VLANG='zh'}else if(es){VOICE=es;VLANG='es'}else{VOICE=null;VLANG=vs.length?'other':'beep'}
-  const b=document.getElementById('bxVoice');if(b&&BX.voice)b.textContent='声音 '+({zh:'中文',es:'西语',other:'开',beep:'哔'}[VLANG]);
+  const b=document.getElementById('bxVoice');if(b&&BX.voice)b.textContent='声音 '+({zh:'中文',es:'西语',other:'开',beep:'音效'}[VLANG]);
 }catch(e){VLANG='beep'}}
 try{if(window.speechSynthesis){pickVoice();speechSynthesis.addEventListener('voiceschanged',pickVoice)}}catch(e){}
 function bxSpeak(text,lang){const sy=window.speechSynthesis;sy.cancel();const u=new SpeechSynthesisUtterance(text);if(VOICE)u.voice=VOICE;u.lang=VOICE?VOICE.lang:lang;u.rate=1.2;sy.speak(u)}
 function bxSayCombo(c){if(!BX.voice)return;try{
-  if(!window.speechSynthesis||VLANG==='beep'){c.forEach((_,i)=>setTimeout(bxBeep,i*260));return}
+  if(!window.speechSynthesis||VLANG==='beep'){sndCombo(c);return}
   if(VLANG==='zh')bxSpeak(c.map(x=>SAY[x]).join('，'),'zh-CN');else bxSpeak(c.map(x=>SAY_ES[x]).join(', '),'es-AR');
-}catch(e){c.forEach((_,i)=>setTimeout(bxBeep,i*260))}}
-function bxSay(txt,es){if(!BX.voice)return;try{if(!window.speechSynthesis||VLANG==='beep'){bxBeep();return}
-  if(VLANG==='zh')bxSpeak(txt,'zh-CN');else bxSpeak(es||txt,'es-AR')}catch(e){bxBeep()}}
-function bxBeep(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;BX.ac=BX.ac||new C();const o=BX.ac.createOscillator(),g=BX.ac.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(BX.ac.destination);o.start();o.stop(BX.ac.currentTime+.12)}catch(e){}}
+}catch(e){sndCombo(c)}}
+function bxSay(txt,es){if(!BX.voice)return;try{if(!window.speechSynthesis||VLANG==='beep'){return}
+  if(VLANG==='zh')bxSpeak(txt,'zh-CN');else bxSpeak(es||txt,'es-AR')}catch(e){}}
+// Sonidos de gimnasio sintetizados (sin archivos): campana, golpe, esquive, aviso de 10 s
+function bxAC(){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;BX.ac=BX.ac||new C();if(BX.ac.state==='suspended')BX.ac.resume();return BX.ac}
+function bxNoise(ac,dur){const b=ac.createBuffer(1,Math.floor(ac.sampleRate*dur),ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const n=ac.createBufferSource();n.buffer=b;return n}
+function sndBell(times){try{const ac=bxAC();if(!ac)return;for(let k=0;k<(times||1);k++){const t=ac.currentTime+k*0.35;
+  [[523,1],[1310,.55],[2093,.3],[2640,.18]].forEach(([f,g])=>{const o=ac.createOscillator(),v=ac.createGain();o.type='sine';o.frequency.value=f;v.gain.setValueAtTime(0,t);v.gain.linearRampToValueAtTime(.22*g,t+.005);v.gain.exponentialRampToValueAtTime(.0001,t+1.6);o.connect(v);v.connect(ac.destination);o.start(t);o.stop(t+1.7)})}}catch(e){}}
+function sndPunch(at){try{const ac=bxAC();if(!ac)return;const t=ac.currentTime+(at||0);
+  const o=ac.createOscillator(),v=ac.createGain();o.type='sine';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);v.gain.setValueAtTime(.7,t);v.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(v);v.connect(ac.destination);o.start(t);o.stop(t+.18);
+  const n=bxNoise(ac,.05),f=ac.createBiquadFilter(),g=ac.createGain();f.type='lowpass';f.frequency.value=1800;g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);n.connect(f);f.connect(g);g.connect(ac.destination);n.start(t)}catch(e){}}
+function sndWhoosh(at){try{const ac=bxAC();if(!ac)return;const t=ac.currentTime+(at||0);const n=bxNoise(ac,.35),f=ac.createBiquadFilter(),g=ac.createGain();
+  f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(2600,t+.3);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.35,t+.12);g.gain.exponentialRampToValueAtTime(.001,t+.33);n.connect(f);f.connect(g);g.connect(ac.destination);n.start(t)}catch(e){}}
+function sndClap(){try{const ac=bxAC();if(!ac)return;for(let k=0;k<3;k++){const t=ac.currentTime+k*.16;const n=bxNoise(ac,.04),f=ac.createBiquadFilter(),g=ac.createGain();f.type='highpass';f.frequency.value=1500;g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.04);n.connect(f);f.connect(g);g.connect(ac.destination);n.start(t)}}catch(e){}}
+function sndCombo(c){c.forEach((x,i)=>{(x==='闪'||x==='潜')?sndWhoosh(i*.28):sndPunch(i*.28)})}
+function bxBeep(){sndBell(1)}
 function bxShow(c){
   const el=$('bxCombo');el.textContent=c.join(' ');el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
   $('bxNames').textContent=c.map(x=>PUNCH[x]).join('，');BX.n++;$('bxN').textContent=BX.n;
@@ -866,16 +878,16 @@ function bxLoop(){
   const c=pool[Math.floor(Math.random()*pool.length)];bxShow(c);
   BX.next=setTimeout(bxLoop,2600+c.length*900+Math.random()*1500);
 }
-function bxTick(){const left=Math.max(0,BX.end-Date.now());$('bxTime').textContent=fmtT(Math.ceil(left/1000));$('bxBar').style.transform='scaleX('+(left/(BX.dur*60000))+')';if(left<=0)bxStop(true)}
+function bxTick(){const left=Math.max(0,BX.end-Date.now());if(BX.on&&!BX.warned&&left<=10000&&BX.dur*60000>15000){BX.warned=true;sndClap()}$('bxTime').textContent=fmtT(Math.ceil(left/1000));$('bxBar').style.transform='scaleX('+(left/(BX.dur*60000))+')';if(left<=0)bxStop(true)}
 function bxStart(){
   if(BX.on){bxStop(false);return}
   BX.on=true;BX.n=0;$('bxN').textContent=0;BX.end=Date.now()+BX.dur*60000;$('bxStart').textContent='停止';
-  bxBeep();bxSay('开始','vamos');clearInterval(BX.timer);BX.timer=setInterval(bxTick,250);bxTick();BX.next=setTimeout(bxLoop,1500);
+  sndBell(2);setTimeout(()=>bxSay('开始','vamos'),700);BX.warned=false;clearInterval(BX.timer);BX.timer=setInterval(bxTick,250);bxTick();BX.next=setTimeout(bxLoop,1500);
 }
 function bxStop(done){
   BX.on=false;clearInterval(BX.timer);clearTimeout(BX.next);try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}
   $('bxStart').textContent='开始';
-  if(done){$('bxCombo').textContent='好！';$('bxNames').textContent=BX.n+' 个组合。连续 '+fStreak()+' 天。';bxBeep();bxSay('结束，做得好','tiempo, bien hecho');try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
+  if(done){$('bxCombo').textContent='好！';$('bxNames').textContent=BX.n+' 个组合。连续 '+fStreak()+' 天。';sndBell(3);setTimeout(()=>bxSay('结束，做得好','tiempo, bien hecho'),1100);try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
   else{$('bxCombo').textContent='准备';$('bxNames').textContent='站好，双手护脸'}
 }
 function bxDurOpts(){const c=$('bxDur');c.innerHTML='';[1,2,3].forEach(m=>{const b=document.createElement('button');b.type='button';b.textContent=m+' 分钟';if(m===BX.dur)b.className='sel';b.onclick=()=>{if(BX.on)return;BX.dur=m;$('bxTime').textContent=fmtT(m*60);bxDurOpts()};c.appendChild(b)})}
