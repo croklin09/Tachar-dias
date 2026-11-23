@@ -339,7 +339,7 @@
   <div class="stack">
     <button class="btn" id="sosBreath">呼吸 2 分钟</button>
     <button class="btn ghost" id="sosGame">汉字 90 秒</button>
-    <button class="btn ghost" id="sosBox">打拳 2 分钟</button>
+    <button class="btn ghost" id="sosFight">打拳 2 分钟</button>
     <button class="btn ghost" id="sosOk">过去了</button>
   </div>
 </div>
@@ -867,7 +867,7 @@ function openBoxer(){
   try{closeSos()}catch(e){}
   try{bxDurOpts();bxStop(false);$('bxTime').textContent=fmtT(BX.dur*60);$('bxBar').style.transform='scaleX(1)'}catch(e){toast('错误: '+e.message)}
 }
-$('sosBox').addEventListener('click',openBoxer);
+$('sosFight').addEventListener('click',openBoxer);
 $('bxStart').onclick=bxStart;
 $('bxClose').onclick=()=>{const done=!BX.on&&BX.n>0;bxStop(false);$('boxer').classList.remove('open');if(done)toast('过去了吗？连续 '+fStreak()+' 天')};
 $('bxVoice').onclick=()=>{BX.voice=!BX.voice;$('bxVoice').textContent=BX.voice?'声音 开':'声音 关';$('bxVoice').setAttribute('aria-pressed',String(BX.voice));if(!BX.voice)try{speechSynthesis.cancel()}catch(e){}};
