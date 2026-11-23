@@ -175,6 +175,39 @@
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
     .bcircle{transition:none!important}
   }
+  .sos{overflow-y:auto}
+  .sos .stack{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .sos .stack .wide{grid-column:1/-1}
+  .sos .stack .btn{padding:13px 8px;font-size:15px;white-space:nowrap}
+  .full{position:fixed;inset:0;background:var(--bg);z-index:40;display:none;flex-direction:column;padding:calc(16px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));overscroll-behavior:contain}
+  .full.open{display:flex}
+  .ghead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ghead h3{margin:0;font-size:20px}
+  .gstat{display:flex;gap:14px;font-size:13px;color:var(--mute)}
+  .gstat b{color:var(--ink);font-size:15px;font-variant-numeric:tabular-nums}
+  .gbar{height:6px;border-radius:999px;background:var(--line);margin:12px 0 0;overflow:hidden}
+  .gbar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left;transition:transform .25s linear}
+  .gq{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:0}
+  .gq small{color:var(--mute);font-size:13px;margin-bottom:6px}
+  .ghz{font-size:clamp(64px,22vw,110px);font-weight:500;line-height:1.1;font-family:'Noto Sans SC',var(--sans)}
+  .ghz.pop{animation:pop .3s cubic-bezier(.2,1.6,.4,1)}
+  .gopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .gopts button{min-height:64px;padding:10px;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:17px;font-weight:500;cursor:pointer;transition:transform .12s ease,background-color .15s ease,border-color .15s ease}
+  .gopts button:active{transform:scale(.97)}
+  .gopts button.ok{background:#16251e;border-color:var(--ok);color:var(--ok)}
+  .gopts button.no{background:#2a1a1a;border-color:var(--bad);color:var(--bad)}
+  .gcombo{height:20px;color:var(--ok);font-size:14px;font-weight:600;margin-top:8px}
+  .gend{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+  .gend.show{display:flex}
+  .gend .big{font-size:72px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .gend p{margin:0;color:var(--mute)}
+  .gfoot{display:flex;gap:8px;margin-top:14px}
+  .gfoot button{flex:1}
+  .bxcombo{font-size:clamp(56px,18vw,96px);font-weight:700;letter-spacing:.02em;line-height:1;font-variant-numeric:tabular-nums}
+  .bxcombo.pop{animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+  .bxnames{color:var(--ink2);font-size:16px;margin-top:12px;min-height:22px}
+  .bxkey{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;color:var(--mute);text-align:center;margin-bottom:10px}
+  .bxkey b{display:block;color:var(--ink);font-size:15px}
 </style>
 </head>
 <body>
@@ -305,7 +338,9 @@
   <p class="q" id="sosQ"></p>
   <div class="stack">
     <button class="btn" id="sosBreath">呼吸 2 分钟</button>
-    <button class="btn ghost" id="sosOk">过去了，我很坚定</button>
+    <button class="btn ghost" id="sosGame">汉字 90 秒</button>
+    <button class="btn ghost" id="sosBox">打拳 2 分钟</button>
+    <button class="btn ghost" id="sosOk">过去了</button>
   </div>
 </div>
 
@@ -323,6 +358,51 @@
     <div class="row" style="margin-top:0"><button id="bClose">关闭</button><button class="primary" id="bStart">开始</button></div>
   </div>
 </div>
+<div class="full" id="game" role="dialog" aria-modal="true" aria-labelledby="gTitle">
+  <div class="ghead">
+    <h3 id="gTitle">汉字</h3>
+    <div class="gstat"><span>HSK <b id="gLvl">1</b></span><span>分 <b id="gScore">0</b></span><span><b id="gTime">90</b>s</span></div>
+  </div>
+  <div class="gbar"><i id="gBar"></i></div>
+  <div class="gq" id="gPlay">
+    <small id="gAsk">意思？</small>
+    <div class="ghz" id="gHz" lang="zh-CN">汉字</div>
+    <div class="gcombo" id="gCombo" aria-live="polite"></div>
+  </div>
+  <div class="gopts" id="gOpts"></div>
+  <div class="gend" id="gEnd">
+    <p>得分</p>
+    <div class="big" id="gFinal">0</div>
+    <p id="gEndSub"></p>
+  </div>
+  <div class="gfoot">
+    <button class="btn ghost" id="gClose">关闭</button>
+    <button class="btn" id="gAgain" hidden>再来一次</button>
+  </div>
+</div>
+
+<div class="full" id="boxer" role="dialog" aria-modal="true" aria-labelledby="bxTitle">
+  <div class="ghead">
+    <h3 id="bxTitle">影子拳</h3>
+    <div class="gstat"><span><b id="bxTime">2:00</b></span><span>组合 <b id="bxN">0</b></span></div>
+  </div>
+  <div class="gbar"><i id="bxBar"></i></div>
+  <div class="gq">
+    <div class="bxcombo" id="bxCombo" aria-live="assertive">准备</div>
+    <div class="bxnames" id="bxNames">站好，双手护脸</div>
+  </div>
+  <div class="bxkey" aria-hidden="true">
+    <div><b>1</b>刺拳</div><div><b>2</b>直拳</div><div><b>3</b>前勾拳</div><div><b>4</b>后勾拳</div>
+    <div><b>5</b>前上勾</div><div><b>6</b>后上勾</div><div><b>闪</b>闪躲</div><div><b>潜</b>下潜</div>
+  </div>
+  <div class="bopts" id="bxDur"></div>
+  <div class="gfoot">
+    <button class="btn ghost" id="bxVoice" aria-pressed="true">声音 开</button>
+    <button class="btn ghost" id="bxClose">关闭</button>
+    <button class="btn" id="bxStart">开始</button>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -357,6 +437,7 @@ function merge(o){
   if(o.mode==='foco'||o.mode==='dist')state.mode=o.mode;
   if(o.foco&&typeof o.foco==='object')state.foco=Object.fromEntries(Object.entries(o.foco).filter(([k,v])=>v==='g'||v==='b'));
   if(Array.isArray(o.fMedals))state.fMedals=o.fMedals.filter(n=>typeof n==='number');
+  if(typeof o.gameBest==='number')state.gameBest=o.gameBest;
   if(Array.isArray(o.reasons))state.reasons=o.reasons.filter(x=>typeof x==='string').slice(0,5);
   if(o.medit&&typeof o.medit==='object')state.medit=Object.fromEntries(Object.entries(o.medit).filter(([k,v])=>typeof v==='number'));
   if(Array.isArray(o.trained))state.trained=o.trained.filter(x=>typeof x==='string');
@@ -700,6 +781,91 @@ $('openSos').onclick=openSos;
 $('sosOk').onclick=()=>{closeSos();toast('做得好。连续记录保住了')};
 $('sosBreath').onclick=()=>{closeSos();bMin=2;bOpts();bStop(false);$('breath').classList.add('open');bStart()};
 
+/* ---- 汉字 rápido ---- */
+const VOCAB=[[1, "爱", "ài", "amar"], [1, "吃", "chī", "comer"], [1, "喝", "hē", "beber"], [1, "大", "dà", "grande"], [1, "小", "xiǎo", "pequeño"], [1, "多", "duō", "mucho"], [1, "少", "shǎo", "poco"], [1, "好", "hǎo", "bueno"], [1, "来", "lái", "venir"], [1, "去", "qù", "ir"], [1, "看", "kàn", "mirar"], [1, "听", "tīng", "escuchar"], [1, "说", "shuō", "hablar"], [1, "读", "dú", "leer"], [1, "写", "xiě", "escribir"], [1, "做", "zuò", "hacer"], [1, "买", "mǎi", "comprar"], [1, "开", "kāi", "abrir"], [1, "住", "zhù", "vivir (en un lugar)"], [1, "坐", "zuò", "sentarse"], [1, "想", "xiǎng", "pensar / querer"], [1, "人", "rén", "persona"], [1, "水", "shuǐ", "agua"], [1, "茶", "chá", "té"], [1, "米饭", "mǐfàn", "arroz"], [1, "苹果", "píngguǒ", "manzana"], [1, "猫", "māo", "gato"], [1, "狗", "gǒu", "perro"], [1, "书", "shū", "libro"], [1, "字", "zì", "carácter"], [1, "家", "jiā", "casa / familia"], [1, "学校", "xuéxiào", "escuela"], [1, "医生", "yīshēng", "médico"], [1, "朋友", "péngyou", "amigo"], [1, "妈妈", "māma", "mamá"], [1, "儿子", "érzi", "hijo"], [1, "女儿", "nǚ'ér", "hija"], [1, "老师", "lǎoshī", "profesor"], [1, "学生", "xuésheng", "estudiante"], [1, "今天", "jīntiān", "hoy"], [1, "明天", "míngtiān", "mañana (día)"], [1, "昨天", "zuótiān", "ayer"], [1, "年", "nián", "año"], [1, "月", "yuè", "mes / luna"], [1, "天气", "tiānqì", "clima"], [1, "热", "rè", "caluroso"], [1, "冷", "lěng", "frío"], [1, "钱", "qián", "dinero"], [1, "衣服", "yīfu", "ropa"], [1, "飞机", "fēijī", "avión"], [1, "电脑", "diànnǎo", "computadora"], [1, "电影", "diànyǐng", "película"], [1, "睡觉", "shuìjiào", "dormir"], [1, "工作", "gōngzuò", "trabajo"], [1, "高兴", "gāoxìng", "contento"], [1, "漂亮", "piàoliang", "lindo"], [1, "中国", "Zhōngguó", "China"], [1, "上", "shàng", "arriba"], [1, "下", "xià", "abajo"], [1, "里", "lǐ", "adentro"], [2, "唱歌", "chànggē", "cantar"], [2, "跳舞", "tiàowǔ", "bailar"], [2, "跑步", "pǎobù", "correr"], [2, "游泳", "yóuyǒng", "nadar"], [2, "运动", "yùndòng", "deporte"], [2, "旅游", "lǚyóu", "viajar"], [2, "休息", "xiūxi", "descansar"], [2, "起床", "qǐchuáng", "levantarse"], [2, "穿", "chuān", "vestirse"], [2, "洗", "xǐ", "lavar"], [2, "走", "zǒu", "caminar"], [2, "送", "sòng", "regalar"], [2, "找", "zhǎo", "buscar"], [2, "懂", "dǒng", "entender"], [2, "知道", "zhīdào", "saber"], [2, "希望", "xīwàng", "desear"], [2, "觉得", "juéde", "opinar / sentir"], [2, "准备", "zhǔnbèi", "preparar"], [2, "帮助", "bāngzhù", "ayudar"], [2, "介绍", "jièshào", "presentar"], [2, "开始", "kāishǐ", "empezar"], [2, "完", "wán", "terminar"], [2, "等", "děng", "aguardar"], [2, "问题", "wèntí", "pregunta / problema"], [2, "时间", "shíjiān", "tiempo"], [2, "早上", "zǎoshang", "temprano a la mañana"], [2, "晚上", "wǎnshang", "noche"], [2, "生日", "shēngrì", "cumpleaños"], [2, "妻子", "qīzi", "esposa"], [2, "丈夫", "zhàngfu", "esposo"], [2, "孩子", "háizi", "niño"], [2, "身体", "shēntǐ", "cuerpo"], [2, "眼睛", "yǎnjing", "ojos"], [2, "鱼", "yú", "pez"], [2, "鸡蛋", "jīdàn", "huevo"], [2, "牛奶", "niúnǎi", "leche"], [2, "咖啡", "kāfēi", "café"], [2, "雪", "xuě", "nieve"], [2, "路", "lù", "camino"], [2, "房间", "fángjiān", "habitación"], [2, "公司", "gōngsī", "empresa"], [2, "手机", "shǒujī", "celular"], [2, "颜色", "yánsè", "color"], [2, "红", "hóng", "rojo"], [2, "白", "bái", "blanco"], [2, "黑", "hēi", "negro"], [2, "快乐", "kuàilè", "feliz"], [2, "累", "lèi", "cansado"], [2, "忙", "máng", "ocupado"], [2, "贵", "guì", "caro"], [2, "便宜", "piányi", "barato"], [2, "远", "yuǎn", "lejos"], [2, "近", "jìn", "cerca"], [2, "新", "xīn", "nuevo"], [2, "快", "kuài", "rápido"], [2, "慢", "màn", "lento"], [2, "真", "zhēn", "verdadero"], [2, "可能", "kěnéng", "posible"], [2, "因为", "yīnwèi", "porque"], [2, "所以", "suǒyǐ", "por eso"], [3, "爱好", "àihào", "pasatiempo"], [3, "帮忙", "bāngmáng", "dar una mano"], [3, "办法", "bànfǎ", "solución"], [3, "比赛", "bǐsài", "competencia"], [3, "变化", "biànhuà", "cambio"], [3, "别人", "biérén", "los demás"], [3, "担心", "dānxīn", "estar preocupado"], [3, "地方", "dìfang", "lugar"], [3, "锻炼", "duànliàn", "entrenar"], [3, "放心", "fàngxīn", "quedarse tranquilo"], [3, "感冒", "gǎnmào", "resfriado"], [3, "故事", "gùshi", "cuento"], [3, "关心", "guānxīn", "interesarse por alguien"], [3, "害怕", "hàipà", "tener miedo"], [3, "后来", "hòulái", "más tarde"], [3, "护照", "hùzhào", "pasaporte"], [3, "花", "huā", "flor"], [3, "环境", "huánjìng", "entorno"], [3, "回答", "huídá", "responder"], [3, "会议", "huìyì", "reunión"], [3, "机会", "jīhuì", "oportunidad"], [3, "记得", "jìde", "recordar"], [3, "健康", "jiànkāng", "salud"], [3, "节日", "jiérì", "feriado"], [3, "结婚", "jiéhūn", "casarse"], [3, "解决", "jiějué", "resolver"], [3, "经常", "jīngcháng", "a menudo"], [3, "决定", "juédìng", "decidir"], [3, "可爱", "kě'ài", "adorable"], [3, "空调", "kōngtiáo", "aire acondicionado"], [3, "哭", "kū", "llorar"], [3, "筷子", "kuàizi", "palitos"], [3, "离开", "líkāi", "irse"], [3, "礼物", "lǐwù", "regalo"], [3, "历史", "lìshǐ", "historia"], [3, "练习", "liànxí", "practicar"], [3, "满意", "mǎnyì", "satisfecho"], [3, "努力", "nǔlì", "esforzarse"], [3, "难过", "nánguò", "triste"], [3, "爬山", "páshān", "subir una montaña"], [3, "认真", "rènzhēn", "dedicado"], [3, "容易", "róngyì", "fácil"], [3, "生气", "shēngqì", "enojarse"], [3, "世界", "shìjiè", "mundo"], [3, "数学", "shùxué", "matemática"], [3, "相信", "xiāngxìn", "confiar"], [3, "习惯", "xíguàn", "costumbre"], [3, "需要", "xūyào", "necesitar"], [3, "选择", "xuǎnzé", "elegir"], [3, "要求", "yāoqiú", "exigir"], [3, "一定", "yídìng", "sin falta"], [3, "影响", "yǐngxiǎng", "influir"], [3, "愿意", "yuànyì", "estar dispuesto"], [3, "照顾", "zhàogù", "cuidar"], [3, "重要", "zhòngyào", "importante"], [3, "主要", "zhǔyào", "principal"], [3, "注意", "zhùyì", "prestar atención"], [3, "自己", "zìjǐ", "uno mismo"], [3, "最近", "zuìjìn", "últimamente"], [3, "安静", "ānjìng", "tranquilo"], [3, "聪明", "cōngming", "inteligente"]];
+const G={on:false,t:0,end:0,score:0,lvl:1,inLvl:0,combo:0,best:0,recent:[],timer:null,lock:false,cur:null,mode:'es',right:0,total:0};
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function gNext(){
+  const pool=VOCAB.filter(w=>w[0]<=G.lvl&&!G.recent.includes(w[1]));
+  const lvlPool=pool.filter(w=>w[0]===G.lvl);
+  const src=(Math.random()<.7&&lvlPool.length)?lvlPool:pool;const w=src[Math.floor(Math.random()*src.length)]||VOCAB[0];
+  G.cur=w;G.recent.push(w[1]);if(G.recent.length>12)G.recent.shift();
+  G.mode=Math.random()<.6?'es':'py';const idx=G.mode==='es'?3:2;
+  const seen=new Set([w[idx]]);const opts=[w[idx]];
+  for(const d of shuffle(VOCAB.filter(x=>x!==w&&Math.abs(x[0]-w[0])<=1))){if(opts.length>=4)break;if(!seen.has(d[idx])){seen.add(d[idx]);opts.push(d[idx])}}
+  $('gAsk').textContent=G.mode==='es'?'意思？':'拼音？';
+  const hz=$('gHz');hz.textContent=w[1];hz.classList.remove('pop');void hz.offsetWidth;hz.classList.add('pop');
+  const box=$('gOpts');box.innerHTML='';
+  shuffle(opts).forEach(o=>{const b=document.createElement('button');b.type='button';b.textContent=o;if(G.mode==='es')b.lang='es';b.onclick=()=>gAnswer(b,o===w[idx],w[idx]);box.appendChild(b)});
+  G.lock=false;
+}
+function gAnswer(b,ok,right){
+  if(G.lock||!G.on)return;G.lock=true;G.total++;
+  if(ok){G.right++;G.combo++;G.inLvl++;G.score+=10*G.lvl+Math.min(G.combo,10)*2;b.classList.add('ok');try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
+    if(G.inLvl>=5&&G.lvl<3){G.lvl++;G.inLvl=0;$('gCombo').textContent='升级！HSK '+G.lvl}else $('gCombo').textContent=G.combo>=3?('连对 ×'+G.combo):'';}
+  else{G.combo=0;G.inLvl=Math.max(0,G.inLvl-2);b.classList.add('no');[...$('gOpts').children].forEach(x=>{if(x.textContent===right)x.classList.add('ok')});
+    $('gCombo').textContent=G.cur[1]+' · '+G.cur[2]+' · '+G.cur[3];try{navigator.vibrate&&navigator.vibrate([20,40,20])}catch(e){}}
+  $('gScore').textContent=G.score;$('gLvl').textContent=G.lvl;
+  setTimeout(()=>{if(G.on)gNext()},ok?380:1300);
+}
+function gTick(){const left=Math.max(0,G.end-Date.now());$('gTime').textContent=Math.ceil(left/1000);$('gBar').style.transform='scaleX('+(left/90000)+')';if(left<=0)gFinish()}
+function gStart(){
+  Object.assign(G,{on:true,score:0,lvl:1,inLvl:0,combo:0,recent:[],right:0,total:0,end:Date.now()+90000});
+  $('gEnd').classList.remove('show');$('gPlay').hidden=false;$('gOpts').hidden=false;$('gAgain').hidden=true;
+  $('gScore').textContent=0;$('gLvl').textContent=1;$('gCombo').textContent='';
+  clearInterval(G.timer);G.timer=setInterval(gTick,200);gTick();gNext();
+}
+function gFinish(){
+  if(!G.on)return;G.on=false;clearInterval(G.timer);
+  const best=Math.max(state.gameBest||0,G.score);const nb=G.score>(state.gameBest||0);state.gameBest=best;save();
+  $('gPlay').hidden=true;$('gOpts').hidden=true;$('gEnd').classList.add('show');$('gAgain').hidden=false;
+  $('gFinal').textContent=G.score;
+  $('gEndSub').textContent=(nb?'新纪录！':'最高分 '+best)+'　答对 '+G.right+' / '+G.total+'　连续 '+fStreak()+' 天';
+  try{navigator.vibrate&&navigator.vibrate([30,60,30])}catch(e){}
+}
+function gClose(){G.on=false;clearInterval(G.timer);$('game').classList.remove('open')}
+$('sosGame').onclick=()=>{closeSos();$('game').classList.add('open');gStart()};
+$('gAgain').onclick=gStart;
+$('gClose').onclick=()=>{const done=!G.on;gClose();if(done)toast('过去了吗？连续 '+fStreak()+' 天，继续加油')};
+
+/* ---- 影子拳 (sombra de boxeo) ---- */
+const PUNCH={'1':'刺拳','2':'直拳','3':'前勾拳','4':'后勾拳','5':'前上勾','6':'后上勾','闪':'闪躲','潜':'下潜'};
+const SAY={'1':'一','2':'二','3':'三','4':'四','5':'五','6':'六','闪':'闪','潜':'潜'};
+const COMBOS=[['1'],['1','2'],['1','1','2'],['1','2','3'],['2','3','2'],['1','2','3','2'],['1','6','3','2'],['闪','2','3'],['1','2','潜','2'],['3','2'],['1','2','5','2'],['6','3','2'],['1','3','2'],['2','闪','2'],['1','2','3','4'],['5','2','3'],['1','1','2','潜','3','2'],['4','3','2']];
+const BX={on:false,end:0,dur:2,n:0,timer:null,next:null,voice:true};
+function bxSay(txt){if(!BX.voice)return;try{const sy=window.speechSynthesis;if(!sy)return;sy.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='zh-CN';u.rate=1.25;sy.speak(u)}catch(e){}}
+function bxBeep(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;BX.ac=BX.ac||new C();const o=BX.ac.createOscillator(),g=BX.ac.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(BX.ac.destination);o.start();o.stop(BX.ac.currentTime+.12)}catch(e){}}
+function bxShow(c){
+  const el=$('bxCombo');el.textContent=c.join(' ');el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
+  $('bxNames').textContent=c.map(x=>PUNCH[x]).join('，');BX.n++;$('bxN').textContent=BX.n;
+  try{navigator.vibrate&&navigator.vibrate(25)}catch(e){}
+  bxSay(c.map(x=>SAY[x]).join(' '));
+}
+function bxLoop(){
+  if(!BX.on)return;
+  const el=(BX.end-Date.now())/(BX.dur*60000);const hard=el<.5?1:0;
+  const pool=hard?COMBOS:COMBOS.filter(c=>c.length<=3);
+  const c=pool[Math.floor(Math.random()*pool.length)];bxShow(c);
+  BX.next=setTimeout(bxLoop,2600+c.length*900+Math.random()*1500);
+}
+function bxTick(){const left=Math.max(0,BX.end-Date.now());$('bxTime').textContent=fmtT(Math.ceil(left/1000));$('bxBar').style.transform='scaleX('+(left/(BX.dur*60000))+')';if(left<=0)bxStop(true)}
+function bxStart(){
+  if(BX.on){bxStop(false);return}
+  BX.on=true;BX.n=0;$('bxN').textContent=0;BX.end=Date.now()+BX.dur*60000;$('bxStart').textContent='停止';
+  bxBeep();bxSay('开始');clearInterval(BX.timer);BX.timer=setInterval(bxTick,250);bxTick();BX.next=setTimeout(bxLoop,1500);
+}
+function bxStop(done){
+  BX.on=false;clearInterval(BX.timer);clearTimeout(BX.next);try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}
+  $('bxStart').textContent='开始';
+  if(done){$('bxCombo').textContent='好！';$('bxNames').textContent=BX.n+' 个组合。连续 '+fStreak()+' 天。';bxBeep();bxSay('结束，做得好');try{navigator.vibrate&&navigator.vibrate([40,80,40])}catch(e){}}
+  else{$('bxCombo').textContent='准备';$('bxNames').textContent='站好，双手护脸'}
+}
+function bxDurOpts(){const c=$('bxDur');c.innerHTML='';[1,2,3].forEach(m=>{const b=document.createElement('button');b.type='button';b.textContent=m+' 分钟';if(m===BX.dur)b.className='sel';b.onclick=()=>{if(BX.on)return;BX.dur=m;$('bxTime').textContent=fmtT(m*60);bxDurOpts()};c.appendChild(b)})}
+$('sosBox').onclick=()=>{closeSos();bxDurOpts();bxStop(false);$('bxTime').textContent=fmtT(BX.dur*60);$('bxBar').style.transform='scaleX(1)';$('boxer').classList.add('open')};
+$('bxStart').onclick=bxStart;
+$('bxClose').onclick=()=>{const done=!BX.on&&BX.n>0;bxStop(false);$('boxer').classList.remove('open');if(done)toast('过去了吗？连续 '+fStreak()+' 天')};
+$('bxVoice').onclick=()=>{BX.voice=!BX.voice;$('bxVoice').textContent=BX.voice?'声音 开':'声音 关';$('bxVoice').setAttribute('aria-pressed',String(BX.voice));if(!BX.voice)try{speechSynthesis.cancel()}catch(e){}};
+
 /* ---- respiración ---- */
 const PATRONES=[
  {id:'calma',n:'平静 4-6',d:'吸气 4 秒，呼气 6 秒。缓解焦虑。',f:[['吸气',4,1],['呼气',6,0]]},
@@ -760,6 +926,8 @@ $('bStart').onclick=bStart;
 
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
+  if($('game').classList.contains('open')){$('gClose').click();return}
+  if($('boxer').classList.contains('open')){$('bxClose').click();return}
   if($('breath').classList.contains('open')){$('bClose').click();return}
   if($('sos').classList.contains('open')){$('sosOk').click();return}
   for(const id of ['emoSheet','medalSheet','daySheet','setSheet']){if($(id).classList.contains('open')){if(id==='daySheet')closeDay();else if(id==='setSheet')$('closeSet').click();else $(id).classList.remove('open');return}}
