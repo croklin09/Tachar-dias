@@ -375,7 +375,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 24</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 25</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -798,6 +798,7 @@ const HOLD={k:null,rec:null,chunks:[],stream:null,st:0,timer:null,mode:null,hit:
 function holdShow(x,y){
   const h=$('hold'),strip=$('holdStrip');
   if(!strip.children.length)EMOJIS.forEach(em=>{const sp=document.createElement('span');sp.textContent=em;sp.dataset.e=em;strip.appendChild(sp)});
+  $('holdTxt').textContent='录音中 0:00　滑动选心情';h.dataset.x=x;
   h.classList.remove('pick');h.style.top=Math.max(80,y-40)+'px';h.classList.add('on');
   const hw=h.offsetWidth/2+10;h.style.left=Math.max(hw,Math.min(innerWidth-hw,x))+'px';
 }
@@ -808,8 +809,8 @@ function holdPick(x,y){
 }
 function holdHide(){$('hold').classList.remove('on','pick');[...$('holdStrip').children].forEach(c=>c.classList.remove('hit'))}
 async function holdRecStart(k){
-  HOLD.chunks=[];HOLD.st=Date.now();$('holdTxt').textContent='录音中 0:00';
-  HOLD.timer=setInterval(()=>{const t=(Date.now()-HOLD.st)/1000;$('holdTxt').textContent='录音中 '+fmtT(t)+'　滑动选心情';if(t>=MAX)holdRecStop(true)},250);
+  HOLD.chunks=[];HOLD.st=Date.now();
+  HOLD.timer=setInterval(()=>{const t=(Date.now()-HOLD.st)/1000;$('holdTxt').textContent='录音中 '+fmtT(t)+'　滑动选心情';{const h=$('hold');if(!h.classList.contains('pick')){const hw=h.offsetWidth/2+10;h.style.left=Math.max(hw,Math.min(innerWidth-hw,+h.dataset.x))+'px'}}if(t>=MAX)holdRecStop(true)},250);
   if(!idb||!navigator.mediaDevices||!window.MediaRecorder){$('holdTxt').textContent='不能录音　滑动选心情';return}
   try{HOLD.stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){$('holdTxt').textContent='需要麦克风权限';return}
   if(HOLD.mode!=='rec'){HOLD.stream.getTracks().forEach(t=>t.stop());HOLD.stream=null;return}
