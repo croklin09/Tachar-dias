@@ -220,7 +220,6 @@
   
   
   
-  .day .flag{bottom:6px}
   #goalIn:disabled{opacity:.5}
   /* ===== Warrior high tech ===== */
   body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;
@@ -243,15 +242,33 @@
   .day .rng.s.e{left:30%;right:30%}
   .day .rdot{position:absolute;top:-6px;left:50%;width:8px;height:8px;margin-left:-4px;transform:rotate(45deg);background:var(--rc);box-shadow:0 0 0 2px var(--card);pointer-events:none}
   /* ejercicio: barra propia, clara, abajo */
-  .day .fit{bottom:4px;width:46%;height:4px;border-radius:1px;background:#e8e9eb;opacity:.9}
-  .day .fit::before,.day .fit::after{content:"";position:absolute;top:-2px;width:3px;height:8px;background:#e8e9eb;border-radius:1px}
-  .day .fit::before{left:-3px}.day .fit::after{right:-3px}
   .day.inmeta:not(.fg):not(.fb):not(.future){box-shadow:none}
   .day.inmeta.future{box-shadow:none}
   .day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px rgba(95,191,143,.35)}
   .medal{border-radius:4px;transform:rotate(45deg);max-width:24px;margin:4px}
   .medal{font-size:9px}
   .medal > *{transform:rotate(-45deg)}
+  /* mancuerna (CSS puro): abajo a la derecha */
+  .day .fit{position:absolute;left:auto;transform:none;right:4px;bottom:5px;width:11px;height:2px;border-radius:1px;background:#e8e9eb;opacity:.95}
+  .day .fit::before,.day .fit::after{content:"";position:absolute;top:-2px;width:3px;height:6px;border-radius:1px;background:#e8e9eb}
+  .day .fit::before{left:-2px}.day .fit::after{right:-2px}
+  /* reacción arriba a la izquierda */
+  .day .emo{top:2px;left:3px;font-size:12px}
+  /* 🏁 arriba a la derecha (oculta el número chico ese día) */
+  .day .flag{top:1px;right:3px;bottom:auto;font-size:10px}
+  .day.goal .dn{display:none}
+  .day .mic{bottom:5px;left:4px;width:5px;height:5px}
+  button.day{touch-action:none;-webkit-user-select:none;user-select:none}
+  /* HUD de mantener: grabación + selector de reacción */
+  .hold{position:fixed;z-index:70;display:none;flex-direction:column;align-items:center;gap:8px;pointer-events:none;transform:translate(-50%,-100%)}
+  .hold.on{display:flex}
+  .hold .strip{display:flex;gap:2px;padding:6px;background:#1a1e21;border:1px solid var(--line);border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .hold .strip span{font-size:24px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .12s ease,background-color .12s ease}
+  .hold .strip span.hit{transform:scale(1.35) translateY(-6px);background:#23302a}
+  .hold .rec{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#2a1717;border:1px solid #5a2a2a;border-radius:999px;color:#ffb3a7;font-size:13px;font-family:var(--mono);white-space:nowrap}
+  .hold .rec i{width:8px;height:8px;border-radius:50%;background:var(--bad);animation:blink 1s steps(2,start) infinite}
+  .hold.pick .rec{display:none}
+  @keyframes blink{to{visibility:hidden}}
 </style>
 </head>
 <body>
@@ -297,7 +314,7 @@
       <button id="next" aria-label="下个月"><i class="ph ph-caret-right" data-fb="›" aria-hidden="true"></i></button>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="legend">点按：好 → 错 → 清除　长按：详情<br><span style="color:var(--ink2)">●</span> 录音　<span style="color:#e8e9eb">⊢⊣</span> 运动　<span style="color:var(--accent)">◆┄</span> 目标线　🏁 终点　<button class="link" id="jumpEnd">去终点</button></div>
+    <div class="legend">点按：打开　长按：录音　长按滑动：心情<br><span style="color:var(--ink2)">●</span> 录音　<span style="color:#e8e9eb">⊢⊣</span> 运动　<span style="color:var(--accent)">◆┄</span> 目标线　🏁 终点　<button class="link" id="jumpEnd">去终点</button></div>
   </section>
 </div>
 
@@ -355,7 +372,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 22</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 23</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -457,6 +474,7 @@
   </div>
 </div>
 
+<div class="hold" id="hold" aria-hidden="true"><div class="strip" id="holdStrip"></div><div class="rec"><i></i><span id="holdTxt">0:00</span></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -769,15 +787,68 @@ function openEmo(k){
 $('emoClear').onclick=()=>{delete state.moods[emoDay];save();render();$('emoSheet').classList.remove('open')};
 $('emoClose').onclick=()=>$('emoSheet').classList.remove('open');
 $('emoSheet').onclick=e=>{if(e.target.id==='emoSheet')$('emoSheet').classList.remove('open')};
+/* Gestos por día:
+   tap rápido            -> abre el día
+   mantener (350 ms)     -> graba audio mientras se mantiene; al soltar se guarda
+   mantener + deslizar   -> cancela la grabación y elige reacción con el dedo */
+const HOLD={k:null,rec:null,chunks:[],stream:null,st:0,timer:null,mode:null,hit:null,t0:0};
+function holdShow(x,y){
+  const h=$('hold'),strip=$('holdStrip');
+  if(!strip.children.length)EMOJIS.forEach(em=>{const sp=document.createElement('span');sp.textContent=em;sp.dataset.e=em;strip.appendChild(sp)});
+  const w=Math.min(innerWidth-16,EMOJIS.length*40+14);const cx=Math.max(w/2+8,Math.min(innerWidth-w/2-8,x));
+  h.style.left=cx+'px';h.style.top=Math.max(110,y-24)+'px';h.classList.add('on');h.classList.remove('pick');
+}
+function holdHide(){$('hold').classList.remove('on','pick');[...$('holdStrip').children].forEach(c=>c.classList.remove('hit'))}
+async function holdRecStart(k){
+  HOLD.chunks=[];HOLD.st=Date.now();$('holdTxt').textContent='录音中 0:00';
+  HOLD.timer=setInterval(()=>{const t=(Date.now()-HOLD.st)/1000;$('holdTxt').textContent='录音中 '+fmtT(t)+'　滑动选心情';if(t>=MAX)holdRecStop(true)},250);
+  if(!idb||!navigator.mediaDevices||!window.MediaRecorder){$('holdTxt').textContent='不能录音　滑动选心情';return}
+  try{HOLD.stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){$('holdTxt').textContent='需要麦克风权限';return}
+  if(HOLD.mode!=='rec'){HOLD.stream.getTracks().forEach(t=>t.stop());HOLD.stream=null;return}
+  const type=pickType();
+  try{HOLD.rec=type?new MediaRecorder(HOLD.stream,{mimeType:type}):new MediaRecorder(HOLD.stream)}catch(e){HOLD.rec=new MediaRecorder(HOLD.stream)}
+  HOLD.rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)HOLD.chunks.push(ev.data)};
+  HOLD.rec.start(200);HOLD.st=Date.now();
+}
+function holdRecStop(save){
+  clearInterval(HOLD.timer);const rec=HOLD.rec,stream=HOLD.stream,k=HOLD.k,st=HOLD.st;HOLD.rec=null;HOLD.stream=null;
+  if(!rec){if(stream)stream.getTracks().forEach(t=>t.stop());return}
+  rec.onstop=async()=>{stream&&stream.getTracks().forEach(t=>t.stop());
+    const dur=(Date.now()-st)/1000;
+    if(!save)return;
+    if(!HOLD.chunks.length||dur<0.8){toast('录音太短，按住久一点');return}
+    try{await putMemo(k,{blob:new Blob(HOLD.chunks,{type:rec.mimeType||'audio/webm'}),dur,at:Date.now()});audioDays.add(k);toast('录音已保存 '+fmtT(dur));render()}catch(e){toast('录音保存失败')}};
+  try{rec.stop()}catch(e){}
+}
 function bindDay(e,k){
-  let t=null,long=false,sx=0,sy=0;
-  const cancel=()=>{clearTimeout(t);t=null;e.classList.remove('press')};
-  e.addEventListener('pointerdown',ev=>{long=false;sx=ev.clientX;sy=ev.clientY;e.classList.add('press');t=setTimeout(()=>{long=true;e.classList.remove('press');try{navigator.vibrate&&navigator.vibrate(25)}catch(_){};openDay(k)},450)});
-  e.addEventListener('pointermove',ev=>{if(t&&(Math.abs(ev.clientX-sx)>10||Math.abs(ev.clientY-sy)>10))cancel()});
-  e.addEventListener('pointerup',cancel);e.addEventListener('pointerleave',cancel);e.addEventListener('pointercancel',cancel);
-  e.addEventListener('contextmenu',ev=>{ev.preventDefault();if(!long&&ev.pointerType!=='touch'&&!ev.sourceCapabilities?.firesTouchEvents)openDay(k)});
-  e.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.shiftKey){ev.preventDefault();openDay(k)}});
-  e.addEventListener('click',()=>{if(long){long=false;return}fCycle(k)});
+  let t=null,sx=0,sy=0,pid=null,fired=false;
+  const reset=()=>{clearTimeout(t);t=null;e.classList.remove('press')};
+  e.addEventListener('pointerdown',ev=>{
+    if(ev.button>0)return;fired=false;sx=ev.clientX;sy=ev.clientY;pid=ev.pointerId;e.classList.add('press');
+    try{e.setPointerCapture(pid)}catch(_){}
+    t=setTimeout(()=>{t=null;fired=true;e.classList.remove('press');HOLD.k=k;HOLD.mode='rec';
+      try{navigator.vibrate&&navigator.vibrate(30)}catch(_){};holdShow(sx,sy);holdRecStart(k)},350);
+  });
+  e.addEventListener('pointermove',ev=>{
+    if(t&&(Math.abs(ev.clientX-sx)>12||Math.abs(ev.clientY-sy)>12)){reset();return}
+    if(!fired||HOLD.k!==k)return;
+    if(HOLD.mode==='rec'&&(Math.abs(ev.clientX-sx)>18||Math.abs(ev.clientY-sy)>18)){HOLD.mode='pick';holdRecStop(false);$('hold').classList.add('pick');try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}
+    if(HOLD.mode==='pick'){
+      let hit=null;[...$('holdStrip').children].forEach(c=>{const r=c.getBoundingClientRect();const on=ev.clientX>=r.left-2&&ev.clientX<=r.right+2;c.classList.toggle('hit',on);if(on)hit=c.dataset.e});
+      if(hit&&hit!==HOLD.hit){try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}}HOLD.hit=hit;
+    }
+  });
+  const end=ev=>{
+    if(t){reset();return}
+    if(!fired||HOLD.k!==k)return;
+    if(HOLD.mode==='rec')holdRecStop(true);
+    else if(HOLD.mode==='pick'){if(HOLD.hit){state.moods[k]=HOLD.hit;save();render();toast('心情 '+HOLD.hit)}}
+    HOLD.mode=null;HOLD.k=null;HOLD.hit=null;holdHide();
+  };
+  e.addEventListener('pointerup',end);
+  e.addEventListener('pointercancel',ev=>{if(t){reset();return}if(fired&&HOLD.k===k){if(HOLD.mode==='rec')holdRecStop(false);HOLD.mode=null;HOLD.k=null;holdHide()}});
+  e.addEventListener('contextmenu',ev=>ev.preventDefault());
+  e.addEventListener('click',ev=>{if(fired){fired=false;return}openDay(k)});
 }
 function toggle(k){
   const i=state.marked.indexOf(k);
