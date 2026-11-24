@@ -272,6 +272,13 @@
   .hold .hint{display:none;font-size:12px;color:var(--mute)}
   .hold.pick .hint{display:block}
   @keyframes blink{to{visibility:hidden}}
+  .memolist{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  .memoitem{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-ctl);padding:6px 8px}
+  .memoitem .mt{font-family:var(--mono);font-size:12px;color:var(--mute);white-space:nowrap;line-height:1.3}
+  .memoitem audio{width:100%;height:36px;margin:0;min-width:0}
+  .memoitem .del{border:0;background:none;color:var(--mute);width:36px;height:36px;border-radius:var(--r-ctl);cursor:pointer;font-size:18px}
+  .memoitem .del.c{color:var(--bad);background:#2a1a1a}
+  .day .mic b{position:absolute;left:7px;bottom:-4px;font:600 8px/1 var(--mono);color:var(--ink2)}
 </style>
 </head>
 <body>
@@ -329,13 +336,14 @@
     <div class="row" style="margin-top:0"><button id="dayGood">好</button><button id="dayBad">错</button><button id="dayFit"></button></div>
     <div class="row" style="margin-top:8px"><button id="dayEmo">心情 😊</button></div>
     <div class="memo">
-      <h4>今天的录音</h4>
+      <h4>录音</h4>
       <div class="rec">
         <button class="recbtn" id="recBtn" aria-label="录音"><i></i></button>
         <div class="rectxt" id="recTxt"><b>0:00</b>点一下开始录音（最多 2 分钟）</div>
       </div>
       <audio id="player" controls hidden></audio>
       <div class="row" id="memoActions" hidden><button class="danger" id="delMemo">删除录音</button></div>
+      <div class="memolist" id="memoList"></div>
       <p class="note">录音只保存在这部手机上。</p>
     </div>
     <div class="row"><button id="closeDay">关闭</button></div>
@@ -375,7 +383,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 25</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 26</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -535,6 +543,14 @@ const getMemo=k=>tx('readonly',s=>s.get(k));
 const putMemo=(k,v)=>tx('readwrite',s=>s.put(v,k));
 const delMemo=k=>tx('readwrite',s=>s.delete(k));
 const memoKeys=()=>tx('readonly',s=>s.getAllKeys());
+const dayOfKey=k=>String(k).split('#')[0];
+const newMemoKey=d=>d+'#'+Date.now();
+const audioCount={};
+async function refreshAudioDays(){try{const ks=await memoKeys()||[];audioDays.clear();for(const k in audioCount)delete audioCount[k];
+  ks.forEach(k=>{k=String(k);if(k.startsWith('__'))return;const d=dayOfKey(k);audioDays.add(d);audioCount[d]=(audioCount[d]||0)+1})}catch(e){}}
+async function listMemos(d){const ks=(await memoKeys()||[]).map(String).filter(k=>k===d||k.startsWith(d+'#'));
+  const out=[];for(const k of ks){try{const m=await getMemo(k);if(m&&m.blob)out.push({key:k,...m})}catch(e){}}
+  return out.sort((a,b)=>(a.at||0)-(b.at||0))}
 
 /* ---- lógica ---- */
 function streak(){const set=new Set(state.marked);let n=0;const d=new Date();if(!set.has(key(d)))d.setDate(d.getDate()-1);while(set.has(key(d))){n++;d.setDate(d.getDate()-1)}return n}
@@ -740,7 +756,7 @@ function renderFoco(){
       if(k===mk.start)e.insertAdjacentHTML('beforeend','<span class="rdot" style="--rc:'+col+'"></span>');}
     if(state.moods[k])e.insertAdjacentHTML('beforeend','<span class="emo">'+state.moods[k]+'</span>');
     if(state.trained.includes(k))e.insertAdjacentHTML('beforeend','<span class="fit"></span>');
-    if(audioDays.has(k))e.insertAdjacentHTML('beforeend','<span class="mic"></span>');
+    if(audioDays.has(k))e.insertAdjacentHTML('beforeend','<span class="mic">'+((audioCount[k]||0)>1?'<b>'+audioCount[k]+'</b>':'')+'</span>');
     if(k<=tk)bindDay(e,k);
     grid.appendChild(e);
   }
@@ -826,7 +842,7 @@ function holdRecStop(save){
     const dur=(Date.now()-st)/1000;
     if(!save)return;
     if(!HOLD.chunks.length||dur<0.8){toast('录音太短，按住久一点');return}
-    try{await putMemo(k,{blob:new Blob(HOLD.chunks,{type:rec.mimeType||'audio/webm'}),dur,at:Date.now()});audioDays.add(k);toast('录音已保存 '+fmtT(dur));render()}catch(e){toast('录音保存失败')}};
+    try{await putMemo(newMemoKey(k),{blob:new Blob(HOLD.chunks,{type:rec.mimeType||'audio/webm'}),dur,at:Date.now()});await refreshAudioDays();toast('录音已保存 '+fmtT(dur));render()}catch(e){toast('录音保存失败')}};
   try{rec.stop()}catch(e){}
 }
 function bindDay(e,k){
@@ -886,11 +902,25 @@ function refreshDayToggle(){const f=state.trained.includes(curDay);$('dayFit').i
   $('dayBad').textContent=v==='b'?'错 ✓':'错';$('dayBad').style.background=v==='b'?'#2a1a1a':'';$('dayBad').style.color=v==='b'?'var(--bad)':'';
   $('dayEmo').textContent='心情 '+(state.moods[curDay]||'😊');}
 function setDay(k,v){if(state.foco[k]===v)delete state.foco[k];else state.foco[k]=v;fPop=k;save();fCheck(true);render();refreshDayToggle()}
+const memoURLs=[];
 async function showMemo(k){
-  const p=$('player');if(playURL){URL.revokeObjectURL(playURL);playURL=null}
-  let m=null;try{if(idb)m=await getMemo(k)}catch(e){}
-  if(m&&m.blob){playURL=URL.createObjectURL(m.blob);p.src=playURL;p.hidden=false;$('memoActions').hidden=false;$('recTxt').innerHTML='<b>'+fmtT(m.dur||0)+'</b>重新录音会替换这段录音'}
-  else{p.removeAttribute('src');p.hidden=true;$('memoActions').hidden=true;$('recTxt').innerHTML='<b>0:00</b>点一下开始录音（最多 2 分钟）'}
+  memoURLs.splice(0).forEach(u=>URL.revokeObjectURL(u));
+  $('player').hidden=true;$('memoActions').hidden=true;
+  const list=$('memoList');list.innerHTML='';
+  let ms=[];try{if(idb)ms=await listMemos(k)}catch(e){}
+  $('recTxt').innerHTML='<b>'+(ms.length?ms.length+' 段':'0:00')+'</b>'+(ms.length?'点一下再录一段（最多 2 分钟）':'点一下开始录音（最多 2 分钟）');
+  ms.forEach(m=>{
+    const u=URL.createObjectURL(m.blob);memoURLs.push(u);
+    const row=document.createElement('div');row.className='memoitem';
+    const t=new Date(m.at||Date.now());
+    row.innerHTML='<span class="mt">'+pad(t.getHours())+':'+pad(t.getMinutes())+'<br>'+fmtT(m.dur||0)+'</span>';
+    const au=document.createElement('audio');au.controls=true;au.preload='metadata';au.src=u;row.appendChild(au);
+    const del=document.createElement('button');del.type='button';del.className='del';del.setAttribute('aria-label','删除这段录音');del.innerHTML='<i class="ph ph-trash" data-fb="🗑" aria-hidden="true"></i>';
+    del.onclick=async()=>{if(!del.classList.contains('c')){del.classList.add('c');setTimeout(()=>del.classList.remove('c'),2500);toast('再点一下删除');return}
+      try{await delMemo(m.key);await refreshAudioDays();render();showMemo(k);toast('录音已删除')}catch(e){}};
+    row.appendChild(del);list.appendChild(row);
+  });
+  try{iconFallback()}catch(e){}
 }
 function pickType(){const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];for(const t of c){try{if(MediaRecorder.isTypeSupported(t))return t}catch(e){}}return ''}
 async function startRec(){
@@ -907,7 +937,7 @@ async function startRec(){
     const dur=(Date.now()-recStart)/1000;
     if(!chunks.length||dur<0.5){toast('录音太短');showMemo(day);return}
     const blob=new Blob(chunks,{type:rec.mimeType||type||'audio/webm'});
-    try{await putMemo(day,{blob,dur,at:Date.now()});audioDays.add(day);toast('录音已保存');render();if(curDay===day)showMemo(day)}
+    try{await putMemo(newMemoKey(day),{blob,dur,at:Date.now()});await refreshAudioDays();toast('录音已保存');render();if(curDay===day)showMemo(day)}
     catch(e){toast('录音保存失败')}
   };
   rec.start(250);recStart=Date.now();$('recBtn').classList.add('on');
@@ -919,13 +949,13 @@ $('recBtn').onclick=()=>{if(rec&&rec.state==='recording')stopRec();else startRec
 $('delMemo').onclick=async e=>{
   const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='再点一下确认';return}
   b.dataset.c='';b.textContent='删除录音';
-  try{await delMemo(curDay);audioDays.delete(curDay);render();showMemo(curDay);toast('录音已删除')}catch(err){}
+
 };
 $('dayGood').onclick=()=>setDay(curDay,'g');
 $('dayBad').onclick=()=>setDay(curDay,'b');
 $('dayEmo').onclick=()=>{closeDay();openEmo(curDay)};
 $('dayFit').onclick=()=>{toggleFit(curDay);refreshDayToggle()};
-function closeDay(){stopRec();$('player').pause();$('daySheet').classList.remove('open');$('delMemo').dataset.c='';$('delMemo').textContent='删除录音'}
+function closeDay(){stopRec();$('player').pause();document.querySelectorAll('#memoList audio').forEach(a=>a.pause());$('daySheet').classList.remove('open');$('delMemo').dataset.c='';$('delMemo').textContent='删除录音'}
 $('closeDay').onclick=closeDay;
 $('daySheet').onclick=e=>{if(e.target.id==='daySheet')closeDay()};
 
@@ -1202,7 +1232,7 @@ function iconFallback(){if(iconsOk())return;document.querySelectorAll('i.ph[data
 setTimeout(()=>{iconFallback();if(!iconsOk())new MutationObserver(iconFallback).observe(document.body,{childList:true,subtree:true})},2500);
 /* ---- init ---- */
 load();checkMedals(false);fCheck(false);ensureMetas(true);render();
-(async()=>{try{idb=await openDB();(await memoKeys()||[]).forEach(k=>{if(!String(k).startsWith('__'))audioDays.add(k)});render()}catch(e){}})();
+(async()=>{try{idb=await openDB();await refreshAudioDays();render()}catch(e){}})();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 let lastDay=todayK();
 setInterval(()=>{if(todayK()!==lastDay){lastDay=todayK();ensureMetas(true);render()}},60000);
