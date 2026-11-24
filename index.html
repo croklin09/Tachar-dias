@@ -221,6 +221,7 @@
   .day .rdot{position:absolute;bottom:-1px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--rc);box-shadow:0 0 0 2px var(--card);pointer-events:none}
   .day .fit{bottom:8px}
   .day .flag{bottom:6px}
+  #goalIn:disabled{opacity:.5}
 </style>
 </head>
 <body>
@@ -246,6 +247,7 @@
       <div>还剩 <b id="left">90</b></div>
       <div>目标期 <b id="endTxt">-</b></div>
     </div>
+    <button type="button" class="btn ghost" id="newMeta" hidden style="grid-column:1/-1;padding:10px">设定新目标</button>
     <div class="quote"><small id="qDay">第 1 天</small><p id="msg"></p></div>
     <div class="medals" id="medals"></div>
   </section>
@@ -296,8 +298,8 @@
     <label for="startIn">开始日期</label>
     <input type="date" id="startIn">
     <label for="goalIn">目标（天）</label>
-    <p class="note" style="margin:-2px 0 6px">当前目标固定不变。新的天数从下一个目标开始。</p>
-    <input type="number" id="goalIn" min="1" max="999" inputmode="numeric">
+    <p class="note" id="goalNote" style="margin:-2px 0 6px"></p>
+    <input type="number" id="goalIn" name="goal" autocomplete="off" min="1" max="999" inputmode="numeric">
     <div class="row"><button id="closeSet">取消</button><button class="primary" id="saveSet">保存</button></div>
     <div class="memo" style="margin-top:14px">
       <h4>目标记录</h4>
@@ -322,7 +324,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 20</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 21</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -527,6 +529,12 @@ function metaStats(m,uptoK){
   return {good,bad,n,len:daysBetween(m.start,m.end)+1};
 }
 function curMeta(){return state.metas.find(m=>!m.result)||null}
+function declareMeta(len){
+  if(curMeta()){toast('目标进行中，不能设定新的目标');return false}
+  const tk=todayK();len=Math.max(1,Math.min(365,len|0));
+  state.metas.push({start:tk,end:addDays(tk,len-1),len,declared:tk});state.goal=len;state.goalSet=true;save();
+  toast('新目标：'+len+' 天，到 '+parse(addDays(tk,len-1)).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}));return true;
+}
 function ensureMetas(celebrate){
   const tk=todayK();let changed=false,last=null;
   if(!state.metas.length){
@@ -536,7 +544,7 @@ function ensureMetas(celebrate){
   let guard=0;
   while(guard++<400){
     const m=curMeta();
-    if(!m){const prev=state.metas[state.metas.length-1];const st=addDays(prev.end,1);const g=Math.max(1,state.goal|0);state.metas.push({start:st,end:addDays(st,g-1),len:g});changed=true;continue}
+    if(!m)break;
     if(m.end<tk){const x=metaStats(m,m.end);m.pct=Math.round(x.good/x.len*100);m.result=metaGrade(m.pct).t;last=m;changed=true;continue}
     break;
   }
@@ -547,7 +555,7 @@ function showMetaResult(m){
   const g=metaGrade(m.pct);
   $('mBig').textContent=m.pct+'%';$('mBig').style.background=g.c;$('mBig').style.fontSize='30px';
   $('mName').textContent='目标结果：'+g.t;
-  $('mSub').textContent=parse(m.start).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})+' 到 '+parse(m.end).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})+'，'+m.len+' 天。新目标已经开始。';
+  $('mSub').textContent=parse(m.start).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})+' 到 '+parse(m.end).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})+'，'+m.len+' 天。现在可以设定新的目标。';
   $('medalSheet').classList.add('open');
 }
 function renderMetaHistory(){
@@ -557,7 +565,7 @@ function renderMetaHistory(){
   done.forEach(m=>{const g=metaGrade(m.pct);const d=document.createElement('div');d.className='mrow';
     d.innerHTML='<span>'+parse(m.start).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' - '+parse(m.end).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+'</span><b style="color:'+g.c+'">'+g.t+' '+m.pct+'%</b>';box.appendChild(d)});
 }
-function fEnd(){const m=curMeta();if(m)return parse(m.end);const d=new Date();const s=fStreak();const st=new Date();
+function fEnd(){const m=curMeta();if(m)return parse(m.end);return new Date();const d=new Date();const s=fStreak();const st=new Date();
   if(state.foco[key(d)]!=='g')st.setDate(st.getDate()-1);
   st.setDate(st.getDate()-s+1);if(s===0){st.setTime(d.getTime());if(state.foco[key(d)]==='b')st.setDate(st.getDate()+1)}
   st.setDate(st.getDate()+state.goal-1);return st}
@@ -621,16 +629,22 @@ function renderFoco(){
   const s=fStreak(),g=state.goal,f=state.foco,tk=todayK();
   const goods=Object.values(f).filter(v=>v==='g').length,bads=Object.values(f).filter(v=>v==='b').length;
   ensureMetas(false);
-  const M=curMeta(),X=metaStats(M,tk);
-  const elapsed=X.n-(f[tk]?0:1);const pctNow=elapsed>0?Math.round(X.good/elapsed*100):100;
-  const dayIn=daysBetween(M.start,tk)+1;
-  $('streak').textContent=s;$('totalL').textContent='好率';$('total').textContent=(elapsed>0?pctNow:'-')+(elapsed>0?'%':'');
-  $('total').style.color=elapsed>0?metaGrade(pctNow).c:'';
-  $('goalTxt').textContent='第 '+dayIn+' / '+M.len+' 天';$('left').textContent=Math.max(0,X.len-dayIn)+' 天';
-  $('arc').setAttribute('stroke','#5fbf8f');$('arc').style.strokeDashoffset=276.5*(1-Math.min(1,X.good/X.len));
+  const M=curMeta();
+  $('streak').textContent=s;$('totalL').textContent='好率';$('arc').setAttribute('stroke','#5fbf8f');
+  if(M){
+    const X=metaStats(M,tk);const elapsed=X.n-(f[tk]?0:1);const pctNow=elapsed>0?Math.round(X.good/elapsed*100):100;
+    const dayIn=daysBetween(M.start,tk)+1;
+    $('total').textContent=elapsed>0?pctNow+'%':'-';$('total').style.color=elapsed>0?metaGrade(pctNow).c:'';
+    $('goalTxt').textContent='第 '+dayIn+' / '+M.len+' 天';$('left').textContent=Math.max(0,X.len-dayIn)+' 天';
+    $('arc').style.strokeDashoffset=276.5*(1-Math.min(1,X.good/X.len));
+    $('newMeta').hidden=true;
+  }else{
+    $('total').textContent='-';$('total').style.color='';$('goalTxt').textContent='未设定';$('left').textContent='-';
+    $('arc').style.strokeDashoffset=276.5;$('newMeta').hidden=false;
+  }
   const q=message(s,g);$('qDay').textContent='第 '+q.n+' 天'+(q.n>90?'':' / 90');$('msg').textContent=f[tk]==='b'?'一个“错”抹不掉你学到的东西。明天，重新开始第一天。':q.t;
   const endK=key(fEnd());
-  $('endTxt').textContent=parse(M.start).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' → '+parse(M.end).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'});
+  $('endTxt').textContent=M?parse(M.start).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' → '+parse(M.end).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}):'-';
   // medallas foco
   const c=$('medals');c.innerHTML='';
   MEDALLAS.forEach(m=>{const on=state.fMedals.includes(m.d);const b=document.createElement('button');
@@ -653,8 +667,8 @@ function renderFoco(){
     if(k>tk){e.classList.add('future');e.disabled=true}if(k===tk){e.classList.add('today');e.setAttribute('aria-current','date')}
     if(f[k]){e.classList.add(f[k]==='g'?'fg':'fb');if(k===fPop)e.classList.add('pop');e.innerHTML='<span class="dn">'+d+'</span><span class="hz">'+(f[k]==='g'?'好':'错')+'</span>'}
     else e.textContent=d;
-    if(k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
-    if(k>=M.start&&k<=M.end)e.classList.add('inmeta');
+    if(M&&k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
+    if(M&&k>=M.start&&k<=M.end)e.classList.add('inmeta');
     const mk=state.metas.find(m=>k>=m.start&&k<=m.end);
     if(mk){const col=mk.result?metaGrade(mk.pct).c:'var(--accent)';const cls='rng'+(k===mk.start?' s':'')+(k===mk.end?' e':'')+(mk.result?' past':'');
       e.insertAdjacentHTML('beforeend','<span class="'+cls+'" style="--rc:'+col+'"></span>');
@@ -796,10 +810,13 @@ $('jumpEnd').onclick=()=>{const e=fEnd();view=new Date(e.getFullYear(),e.getMont
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
 $('title').onchange=e=>{state.title=e.target.value.trim()||'一天一天';save();render()};
-$('openSet').onclick=()=>{renderMetaHistory();renderSosSettings();for(let i=0;i<5;i++)$('r'+i).value=state.reasons[i]||'';$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='清除所有记录';$('setSheet').classList.add('open')};
+$('openSet').onclick=()=>{renderMetaHistory();
+  {const m=curMeta(),gi=$('goalIn');gi.disabled=!!m;
+   $('goalNote').textContent=m?('目标进行中（'+parse(m.start).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' → '+parse(m.end).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+'）。结束后才能设定新的目标。'):'现在没有目标。输入天数并保存，今天开始。';}renderSosSettings();for(let i=0;i<5;i++)$('r'+i).value=state.reasons[i]||'';$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='清除所有记录';$('setSheet').classList.add('open')};
 $('closeSet').onclick=()=>{sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')};
 $('setSheet').onclick=e=>{if(e.target.id==='setSheet'){sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')}};
-$('saveSet').onclick=()=>{state.reasons=[0,1,2,3,4].map(i=>$('r'+i).value.trim()).filter(Boolean);if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0&&g!==state.goal){state.goal=g;state.goalSet=true;toast('新的天数从下一个目标开始')}save();render();$('setSheet').classList.remove('open')};
+$('newMeta').onclick=()=>$('openSet').click();
+$('saveSet').onclick=()=>{state.reasons=[0,1,2,3,4].map(i=>$('r'+i).value.trim()).filter(Boolean);if($('startIn').value)state.start=$('startIn').value;if(!curMeta()){const g=parseInt($('goalIn').value,10);if(g>0)declareMeta(g)}save();render();$('setSheet').classList.remove('open')};
 $('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='再点一下确认';return}state.marked=[];state.foco={};save();render();$('setSheet').classList.remove('open')};
 $('exportBtn').onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
