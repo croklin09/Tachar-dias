@@ -12,11 +12,12 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="preload" href="assets/fonts/geist-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/icons/style.css">
 <style>
-  :root{--bg:#0d1310;--card:#131b17;--sunk:#0f1612;--line:#22302a;--ink:#ebe7dc;--ink2:#c9c8bb;--mute:#8e978c;--accent:#7cb58f;--accent2:#c9c8bb;--ok:#7cb58f;--bad:#d4796c;--amber:#d8a650;--moss:#4f8a63;--r-ctl:6px;--r-card:8px;--sans:'Geist','Noto Sans SC',system-ui,sans-serif;--mono:'Geist Mono','Noto Sans SC',ui-monospace,monospace;--serif:var(--sans)}
+  :root{--bg:#0d1310;--card:#131b17;--sunk:#0f1612;--line:#22302a;--ink:#ebe7dc;--ink2:#c9c8bb;--mute:#8e978c;--accent:#7cb58f;--accent2:#c9c8bb;--ok:#7cb58f;--bad:#d4796c;--amber:#d8a650;--moss:#4f8a63;--r-ctl:10px;--r-card:14px;--sans:'Geist','Noto Sans SC',system-ui,sans-serif;--mono:'Geist Mono','Noto Sans SC',ui-monospace,monospace;--serif:var(--sans)}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);height:100%;overflow:hidden}
   body{height:100vh;height:100dvh;padding:calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom))}
@@ -50,7 +51,7 @@
   .dow{font-size:11px;color:var(--mute);text-align:center;padding-bottom:4px}
   .day{position:relative;min-height:0;border-radius:var(--r-ctl);display:flex;align-items:center;justify-content:center;font-size:14px;background:#18211c;border:1px solid transparent;cursor:pointer;user-select:none}
   .day.empty{background:none;cursor:default}
-  .day.future{color:#4a564d;background:#131a16}
+  .day.future{color:#748378;background:#121915}
   .day.before{color:#5d6a60}
   .day.today{border-color:var(--accent)}
   .day.start::after{content:"";position:absolute;top:4px;right:4px;width:5px;height:5px;border-radius:50%;background:var(--ok)}
@@ -63,7 +64,7 @@
   .day.goal{border:2px solid var(--ok);background:#1a2a21;color:var(--ok);font-weight:600}
   .day .flag{position:absolute;bottom:1px;right:3px;font-size:11px;line-height:1}
   .day .mic{position:absolute;bottom:3px;left:4px;width:6px;height:6px;border-radius:50%;background:var(--accent2)}
-  .legend{flex:none;font-size:11px;color:var(--mute);margin-top:6px;text-align:center;line-height:1.5}
+  .legend{flex:none;font-size:12px;color:var(--ink2);opacity:.85;margin-top:6px;text-align:center;line-height:1.5}
   .link{background:none;border:0;color:var(--ok);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}
   .sheet{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:10}
   .sheet.open{display:flex}
@@ -119,7 +120,7 @@
   .emogrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
   .emogrid button{font-size:28px;padding:10px 0;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--sunk);cursor:pointer}
   .emogrid button.sel{border-color:var(--accent);background:#17271d}
-  .sosbtn{flex:none;height:40px;padding:0 12px;border-radius:var(--r-ctl);border:1px solid #5a2a2a;background:#2a1717;color:#ff8f7a;font-weight:700;font-size:13px;letter-spacing:.06em;cursor:pointer;font-family:inherit}
+  .sosbtn{flex:none;height:40px;padding:0 12px;border-radius:var(--r-ctl);border:1px solid #5c3a24;background:#26190f;color:#e39a5b;font-weight:700;font-size:13px;letter-spacing:.06em;cursor:pointer;font-family:inherit}
   .sos{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#1a2620,var(--bg) 70%);z-index:35;display:none;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:calc(28px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom))}
   .sos.open{display:flex}
   .sos .k{font-size:12px;color:var(--mute);letter-spacing:.12em;text-transform:uppercase}
@@ -222,11 +223,9 @@
   
   #goalIn:disabled{opacity:.5}
   /* ===== Warrior high tech ===== */
-  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.18;
-    background-image:linear-gradient(rgba(124,181,143,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(124,181,143,.05) 1px,transparent 1px);background-size:24px 24px}
   .wrap{position:relative;z-index:1}
   .stats,.cal{position:relative;background:linear-gradient(180deg,#16201b,#121a15)}
-  .stats::before,.stats::after,.cal::before,.cal::after{content:"";position:absolute;width:12px;height:12px;pointer-events:none;border-color:var(--accent);border-style:solid;opacity:.8}
+  .stats::before,.stats::after,.cal::before,.cal::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none;border-color:var(--amber);border-style:solid;opacity:.55}
   .stats::before,.cal::before{top:-1px;left:-1px;border-width:2px 0 0 2px;border-top-left-radius:var(--r-card)}
   .stats::after,.cal::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;border-bottom-right-radius:var(--r-card)}
   .ring .num b,.meta b,#fitN,#medN,.rectxt b,#bCount,#bLeft,#gTime,#gScore,#bxTime,#bxN,.sos .n,.day,.medal,.qday,#qDay,.calhead h2{font-family:var(--mono)}
@@ -316,6 +315,8 @@
   .gintro.play small{opacity:1}
   .seal{position:absolute;top:18%;right:16%;width:44px;height:44px;border-radius:6px;background:#a8433a;color:#f3e6d8;font-family:'Noto Sans SC',var(--sans);font-weight:700;font-size:26px;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg) scale(1.6);opacity:0;transition:opacity .3s ease 1.3s,transform .35s cubic-bezier(.2,1.6,.4,1) 1.3s;box-shadow:inset 0 0 0 2px rgba(243,230,216,.35)}
   .gintro.play .seal{opacity:.92;transform:rotate(-8deg) scale(1)}
+  .day .flag .ph{font-size:12px;color:var(--amber);vertical-align:0}
+  .day .flag{top:2px;right:3px}
 </style>
 </head>
 <body>
@@ -361,7 +362,7 @@
       <button id="next" aria-label="下个月"><i class="ph ph-caret-right" data-fb="›" aria-hidden="true"></i></button>
     </div>
     <div class="grid" id="grid"></div>
-    <div class="legend">点按：打开　长按：录音　长按滑动：心情<br><span style="color:var(--ink2)">●</span> 录音　<i class="kb" aria-hidden="true" style="font-size:11px"></i> 运动　<span style="display:inline-block;width:9px;height:9px;background:rgba(79,138,99,.8);border-radius:2px;vertical-align:-1px"></span> 冥想　<span style="color:var(--accent)">◆┄</span> 目标线　🏁 终点　<button class="link" id="jumpEnd">去终点</button></div>
+    <div class="legend">点按：打开　长按：录音　长按滑动：心情<br><span style="color:var(--ink2)">●</span> 录音　<i class="kb" aria-hidden="true" style="font-size:11px"></i> 运动　<span style="display:inline-block;width:9px;height:9px;background:rgba(79,138,99,.8);border-radius:2px;vertical-align:-1px"></span> 冥想　<span style="color:var(--accent)">◆┄</span> 目标线　<i class="ph ph-flag-checkered" data-fb="🏁" aria-hidden="true"></i> 终点　<button class="link" id="jumpEnd">去终点</button></div>
   </section>
 </div>
 
@@ -420,7 +421,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 29</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 30</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -547,10 +548,10 @@ const $=id=>document.getElementById(id);
 const LS='tachar-dias-v1';
 const FRASES=["今天不必赢。不回头就够了。", "痛，也在帮你整理一切。", "想念不是软弱。不发消息才是力量。", "只过这一天。明天是明天的事。", "距离不是惩罚，是回到自己的空间。", "深呼吸。今天的感受不会永远存在。", "快一周了。你的大脑正在学一条新的路。", "不需要全部明白，也可以开始放下。", "每一个“好”都是你守住的承诺。", "十天了。这已经不是冲动，是选择。", "沉默也是一种回答，而且是你的回答。", "别再找信号了。你选择平静，就是信号。", "没有发生的事，也教会了你想要什么。", "今天很难，就做最少的。最少也算数。", "半个月了。回头看看，你已经不是第一天的你。", "别给“好起来”定日期。每天好一点就行。", "动一动身体，脑子会更清楚。今天动一下。", "你的能量有限，放在会回报你的地方。", "想念只是一段回忆经过。让它过去。", "今天建一点东西，哪怕很小。", "三个星期。习惯已经扎根了。", "你不需要别人给你结局。结局由你决定。", "有人真心对你好。今天给其中一个人发消息。", "未来的你会感谢现在的你。", "不是忘记她，是不再等她。", "好日子会突然来。活在当下。", "你的价值不取决于谁选择了你。", "今天做一件只为自己开心的事。", "一个难过的日子，抹不掉二十八个坚定的日子。", "一个月了。曾经觉得不可能的，现在是你的日常。", "噪音变小了，听听你自己想要什么。", "平静不无聊。它是建造一切的地基。", "今天好好睡觉。休息也是前进。", "重要的东西，要一块砖一块砖地建。", "别为了看门还在不在，又去开门。", "安静地种下的，也会长大。", "今天给你的项目一个小时。就一个小时。", "你学会了和自己在一起。这没人能拿走。", "诱惑来了，就看看你的连续天数。", "四十天。你不是在硬撑，你是在前进。", "感恩会改变焦点。写下今天的三件好事。", "一个人不等于空虚。", "你想要的生活，装不下让你痛的东西。", "今天选择你欣赏的那个自己。", "一个半月。开始这件事的你会为你骄傲。", "伤口从里往外愈合。耐心一点。", "不跟别人比。跟第一天的自己比。", "腾出空间：新的东西需要位置。", "自律就是在不想做的时候，记得你想要什么。", "五十天。一半的路走完了，而且是最难的一半。", "出去走走，看看城市，让自己惊喜一下。", "一章不能定义你的整个故事。", "今天照顾你的身体，像照顾你最重要的作品。", "想做事的劲会回来的。总会回来。", "对自己说好话，在心里也一样。", "放开的手，才能拿新的东西。", "每一个坚定的日子，都让地基更深。", "不用等准备好。开始了，就会准备好。", "看看你在不知不觉中走了多远。", "两个月。这已经是你的一部分了。", "今天跟朋友约一下。连接会治愈。", "你的注意力是宝藏，放在你正在建造的东西上。", "不需要别人看见。你自己知道。", "值得的东西，会来到站稳的人身边。", "六十五天。坚定，平静，活在当下。", "记得你为什么开始，再看看你已经走了多远。", "今天试一件从没做过的事。", "忠于自己，是你一生最长的关系。", "你今天的平静，是一天一天赢来的。", "七十天。这已经不是努力，是你的身份。", "重新做大梦吧。现在有空间了。", "爱的能力还是你的。", "为好事做准备：你已经腾出了位置。", "今天认可自己一件事。敢的话，说出来。", "七十五天。再十五天就完成了。", "大事要到最后才看得清。继续走。", "你的未来没有她的名字，只有你的名字。", "你不再从外面找，已经在心里找到的东西。", "每过一天，回头的路就更远一点。", "八十天。看看那个圆环，快满了。", "今天感谢第一天的自己。", "接下来的一切，配得上现在的你。", "坚强地结束。每一天都和第一天一样重要。", "你成了一个说到做到的人。", "还剩五天。享受最后一段路。", "看看你在痛的时候建造了多少。", "目标就在眼前。慢慢走。", "明天是倒数第二天。今天，只要再加一天。", "再一天，这个圆就画完了。", "九十天。你没有失去一个人，你找到了自己。"];
 const MEDALLAS=[
- {d:3,n:'第一步',c:'#b87333'},{d:7,n:'一周',c:'#b87333'},{d:10,n:'坚定十天',c:'#b87333'},
- {d:15,n:'半个月',c:'#b8bfb4'},{d:21,n:'习惯',c:'#b8bfb4'},{d:30,n:'一个月',c:'#b8bfb4'},
+ {d:3,n:'第一步',c:'#a8744a'},{d:7,n:'一周',c:'#a8744a'},{d:10,n:'坚定十天',c:'#a8744a'},
+ {d:15,n:'半个月',c:'#9fb0a4'},{d:21,n:'习惯',c:'#9fb0a4'},{d:30,n:'一个月',c:'#9fb0a4'},
  {d:45,n:'一个半月',c:'#d8a650'},{d:60,n:'两个月',c:'#d8a650'},{d:75,n:'最后冲刺',c:'#d8a650'},
- {d:90,n:'自由',c:'#7fb59a'}
+ {d:90,n:'自由',c:'#7cb58f'}
 ];
 
 
@@ -743,7 +744,7 @@ function render(){
     if(k<state.start)e.classList.add('before');
     if(k===tk)e.classList.add('today');
     if(k===state.start)e.classList.add('start');
-    if(k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
+    if(k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag"><i class="ph ph-flag-checkered" data-fb="🏁" aria-hidden="true"></i></span>')}
     if(audioDays.has(k))e.insertAdjacentHTML('beforeend','<span class="mic"></span>');
     if(state.moods[k])e.insertAdjacentHTML('beforeend','<span class="emo">'+state.moods[k]+'</span>');
     if(state.trained.includes(k))e.insertAdjacentHTML('beforeend','<span class="fit"></span>');
@@ -780,7 +781,7 @@ function renderFoco(){
   const c=$('medals');c.innerHTML='';
   MEDALLAS.forEach(m=>{const on=state.fMedals.includes(m.d);const b=document.createElement('button');
     b.className='medal'+(on?' on':'');b.innerHTML='<span>'+m.d+'</span>';if(on)b.style.background=m.c;
-    b.onclick=()=>toast(on?(m.n+' · '+m.d+' 天 ✓'):(m.n+' · 还差 '+Math.max(0,m.d-s)+' 天'));c.appendChild(b)});
+    b.onclick=()=>toast(on?(m.n+'　'+m.d+' 天 ✓'):(m.n+'　还差 '+Math.max(0,m.d-s)+' 天'));c.appendChild(b)});
   const tr=state.trained.includes(tk);$('fitBtn').classList.toggle('on',tr);$('fitN').textContent=state.trained.length;
   const tb=$('todayBtn');tb.classList.remove('done','fgood','fbad');
   if(!f[tk])tb.textContent='今天 好';
@@ -798,7 +799,7 @@ function renderFoco(){
     if(k>tk){e.classList.add('future');e.disabled=true}if(k===tk){e.classList.add('today');e.setAttribute('aria-current','date')}
     if(f[k]){e.classList.add(f[k]==='g'?'fg':'fb');if(k===fPop)e.classList.add('pop');e.innerHTML='<span class="dn">'+d+'</span><span class="hz">'+(f[k]==='g'?'好':'错')+'</span>'}
     else e.textContent=d;
-    if(M&&k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
+    if(M&&k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag"><i class="ph ph-flag-checkered" data-fb="🏁" aria-hidden="true"></i></span>')}
     if(M&&k>=M.start&&k<=M.end)e.classList.add('inmeta');
     const mk=state.metas.find(m=>k>=m.start&&k<=m.end);
     if(mk){const col=mk.result?metaGrade(mk.pct).c:'var(--accent)';const cls='rng'+(k===mk.start?' s':'')+(k===mk.end?' e':'')+(mk.result?' past':'');
@@ -964,7 +965,7 @@ async function showMemo(k){
     const u=URL.createObjectURL(m.blob);memoURLs.push(u);
     const row=document.createElement('div');row.className='memoitem';
     const t=new Date(m.at||Date.now());
-    row.innerHTML='<span class="mt">'+pad(t.getHours())+':'+pad(t.getMinutes())+'<br>'+fmtT(m.dur||0)+'</span>';
+    row.innerHTML='<span class="mt">'+new Intl.DateTimeFormat('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false}).format(t)+'<br>'+fmtT(m.dur||0)+'</span>';
     const au=document.createElement('audio');au.controls=true;au.preload='metadata';au.src=u;row.appendChild(au);
     const del=document.createElement('button');del.type='button';del.className='del';del.setAttribute('aria-label','删除这段录音');del.innerHTML='<i class="ph ph-trash" data-fb="🗑" aria-hidden="true"></i>';
     del.onclick=async()=>{if(!del.classList.contains('c')){del.classList.add('c');setTimeout(()=>del.classList.remove('c'),2500);toast('再点一下删除');return}
@@ -1102,7 +1103,7 @@ function gAnswer(b,ok,right){
   if(ok){G.right++;G.combo++;G.inLvl++;G.score+=10*G.lvl+Math.min(G.combo,10)*2;b.classList.add('ok');try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}
     if(G.inLvl>=5&&G.lvl<3){G.lvl++;G.inLvl=0;$('gCombo').textContent='升级！HSK '+G.lvl}else $('gCombo').textContent=G.combo>=3?('连对 ×'+G.combo):'';}
   else{G.combo=0;G.inLvl=Math.max(0,G.inLvl-2);b.classList.add('no');[...$('gOpts').children].forEach(x=>{if(x.textContent===right)x.classList.add('ok')});
-    $('gCombo').textContent=G.cur[1]+' · '+G.cur[2]+' · '+G.cur[3];try{navigator.vibrate&&navigator.vibrate([20,40,20])}catch(e){}}
+    $('gCombo').textContent=G.cur[1]+'　'+G.cur[2]+'　'+G.cur[3];try{navigator.vibrate&&navigator.vibrate([20,40,20])}catch(e){}}
   $('gScore').textContent=G.score;$('gLvl').textContent=G.lvl;
   setTimeout(()=>{if(G.on)gNext()},ok?380:1300);
 }
@@ -1284,7 +1285,7 @@ function renderMed(){
   const done=left===0;
   $('medN').textContent=done?'✓':Math.ceil(left/60);
   $('openBreath').classList.toggle('on',done);
-  $('bToday').textContent=done?'今天的目标完成了：'+Math.floor(d/60)+' 分钟 ✓':'今天：'+Math.floor(d/60)+' / 10 分钟 · 还剩 '+fmtT(left);
+  $('bToday').textContent=done?'今天的目标完成了：'+Math.floor(d/60)+' 分钟 ✓':'今天：'+Math.floor(d/60)+' / 10 分钟　还剩 '+fmtT(left);
 }
 function medCommit(){
   if(!bRun||!bRun.st)return;
@@ -1360,6 +1361,19 @@ function hideCalm(){const c=$('calm');calmT.forEach(clearTimeout);calmT=[];c.cla
 $('calm').addEventListener('click',hideCalm);
 let hiddenAt=0;
 document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(hiddenAt&&Date.now()-hiddenAt>10*60000)showCalm()});
+/* ---- manejo de foco para hojas y pantallas completas ---- */
+(function(){const stack=[];
+  const sel='button:not([disabled]):not([hidden]),[href],input:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  const isOpen=el=>el.classList.contains('open')||el.classList.contains('on');
+  document.querySelectorAll('.sheet,.full,.sos,.breath,.calm').forEach(el=>{
+    if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','-1');
+    let was=isOpen(el);
+    new MutationObserver(()=>{const now=isOpen(el);if(now===was)return;was=now;
+      if(now){stack.push(document.activeElement);setTimeout(()=>{const f=el.querySelector(sel);(f||el).focus({preventScroll:true})},50)}
+      else{const prev=stack.pop();if(prev&&document.contains(prev))try{prev.focus({preventScroll:true})}catch(e){}}
+    }).observe(el,{attributes:true,attributeFilter:['class']});
+  });
+})();
 /* ---- init ---- */
 load();checkMedals(false);fCheck(false);ensureMetas(true);render();showCalm();
 (async()=>{try{idb=await openDB();await refreshAudioDays();render()}catch(e){}})();

@@ -1,5 +1,5 @@
-const CACHE = 'tachar-dias-v29';
-const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-192-maskable.png', 'icon-512-maskable.png'];
+const CACHE = 'tachar-dias-v30';
+const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'assets/fonts/fonts.css', 'assets/fonts/geist-latin-400-normal.woff2', 'assets/fonts/geist-latin-500-normal.woff2', 'assets/fonts/geist-latin-600-normal.woff2', 'assets/fonts/geist-latin-700-normal.woff2', 'assets/fonts/geist-mono-latin-400-normal.woff2', 'assets/fonts/geist-mono-latin-500-normal.woff2', 'assets/fonts/geist-mono-latin-600-normal.woff2', 'assets/icons/style.css', 'assets/icons/Phosphor.woff2', 'icon-192.png', 'icon-512.png', 'icon-192-maskable.png', 'icon-512-maskable.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
