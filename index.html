@@ -295,6 +295,27 @@
   .day.med{background-image:linear-gradient(to top,rgba(79,138,99,.55) 0,rgba(79,138,99,.55) calc(var(--med)*100%),transparent calc(var(--med)*100%))}
   .day.med.medfull{box-shadow:inset 0 0 0 1px rgba(124,181,143,.45)}
   .medal.on{color:#1a1410}
+  .calm{position:fixed;inset:0;z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:24px;text-align:center;
+    background:radial-gradient(90% 60% at 50% 35%,#16261c,#0d1310 70%);transition:opacity .7s ease}
+  .calm.on{display:flex}
+  .calm.out{opacity:0}
+  .calm-c{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
+  .calm-ring{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(124,181,143,.35),rgba(124,181,143,.06) 70%);border:1px solid rgba(124,181,143,.4);transform:scale(.5);transition:transform 2.6s ease-in-out}
+  .calm-c b{position:relative;font-size:22px;font-weight:500;color:var(--ink)}
+  .calm-q{max-width:300px;margin:0;font-size:17px;line-height:1.5;color:var(--ink2);text-wrap:balance}
+  .calm-skip{color:var(--mute);font-size:12px;position:absolute;bottom:calc(28px + env(safe-area-inset-bottom))}
+  .gintro{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;position:relative}
+  .gintro.show{display:flex}
+  .gintro-t{display:flex;gap:10px;font-family:'Noto Sans SC',var(--sans);font-weight:700;font-size:96px;line-height:1}
+  .gintro-t span{opacity:0;transform:translateY(10px);filter:blur(6px);transition:opacity .9s ease,transform .9s ease,filter .9s ease}
+  .gintro.play .gintro-t span{opacity:1;transform:none;filter:none}
+  .gintro.play .gintro-t span:nth-child(2){transition-delay:.45s}
+  .gintro p{margin:0;color:var(--ink2);font-family:var(--mono);letter-spacing:.2em;opacity:0;transition:opacity .8s ease 1s}
+  .gintro.play p{opacity:1}
+  .gintro small{color:var(--mute);opacity:0;transition:opacity .6s ease 1.6s}
+  .gintro.play small{opacity:1}
+  .seal{position:absolute;top:18%;right:16%;width:44px;height:44px;border-radius:6px;background:#a8433a;color:#f3e6d8;font-family:'Noto Sans SC',var(--sans);font-weight:700;font-size:26px;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg) scale(1.6);opacity:0;transition:opacity .3s ease 1.3s,transform .35s cubic-bezier(.2,1.6,.4,1) 1.3s;box-shadow:inset 0 0 0 2px rgba(243,230,216,.35)}
+  .gintro.play .seal{opacity:.92;transform:rotate(-8deg) scale(1)}
 </style>
 </head>
 <body>
@@ -399,7 +420,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 28</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 29</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -448,6 +469,7 @@
     <p class="bsub" id="bDesc">选择节奏和时间</p>
     <div class="bopts" id="bPat"></div>
     <div class="bopts" id="bDur"></div>
+    <div class="bopts" id="bSnd" aria-label="环境声"></div>
   </div>
   <div class="bstage"><div style="position:relative;width:240px;height:240px"><div class="bcircle" id="bCircle"></div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><b id="bPhase" style="font-family:var(--sans);font-size:24px;font-weight:500">准备</b><span id="bCount" style="font-size:28px;color:var(--mute);font-variant-numeric:tabular-nums"></span></div></div></div>
   <div class="bfoot">
@@ -461,6 +483,12 @@
     <div class="gstat"><span>HSK <b id="gLvl">1</b></span><span>分 <b id="gScore">0</b></span><span><b id="gTime">90</b>s</span></div>
   </div>
   <div class="gbar"><i id="gBar"></i></div>
+  <div class="gintro" id="gIntro">
+    <div class="seal" aria-hidden="true">汉</div>
+    <div class="gintro-t"><span>汉</span><span>字</span></div>
+    <p>九十秒　HSK 1-3</p>
+    <small>点一下开始</small>
+  </div>
   <div class="gq" id="gPlay">
     <small id="gAsk">意思？</small>
     <div class="ghz" id="gHz" lang="zh-CN">汉字</div>
@@ -502,6 +530,11 @@
 </div>
 
 <div class="hold" id="hold" aria-hidden="true"><div class="hint">松开选择</div><div class="strip" id="holdStrip"></div><div class="rec"><i></i><span id="holdTxt">0:00</span></div></div>
+<div class="calm" id="calm" role="dialog" aria-modal="true" aria-label="一天一天">
+  <div class="calm-c"><div class="calm-ring" id="calmRing"></div><b id="calmPh">吸气</b></div>
+  <p class="calm-q" id="calmQ"></p>
+  <small class="calm-skip">点一下跳过</small>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -535,6 +568,7 @@ function merge(o){
   if(!o||typeof o!=='object')return;
   if(typeof o.title==='string'&&o.title!=='Días de distancia'&&o.title!=='Un día a la vez')state.title=o.title;
   if(o.mode==='foco'||o.mode==='dist')state.mode=o.mode;
+  if(['off','rain','wind','forest'].includes(o.amb))state.amb=o.amb;
   if(o.foco&&typeof o.foco==='object')state.foco=Object.fromEntries(Object.entries(o.foco).filter(([k,v])=>v==='g'||v==='b'));
   if(Array.isArray(o.fMedals))state.fMedals=o.fMedals.filter(n=>typeof n==='number');
   if(Array.isArray(o.metas))state.metas=o.metas.filter(m=>m&&typeof m.start==='string'&&typeof m.end==='string');
@@ -1087,8 +1121,26 @@ function gFinish(){
   $('gEndSub').textContent=(nb?'新纪录！':'最高分 '+best)+'　答对 '+G.right+' / '+G.total+'　连续 '+fStreak()+' 天';
   try{navigator.vibrate&&navigator.vibrate([30,60,30])}catch(e){}
 }
-function gClose(){G.on=false;clearInterval(G.timer);$('game').classList.remove('open')}
-$('sosGame').addEventListener('click',()=>{$('game').classList.add('open');try{closeSos()}catch(e){};try{gStart()}catch(e){toast('错误: '+e.message)}});
+function gClose(){G.on=false;clearInterval(G.timer);clearTimeout(gIntroT);$('gIntro').classList.remove('show','play');$('game').classList.remove('open')}
+function pluck(f,t,vol){const ac=bxAC();if(!ac)return;const o=ac.createOscillator(),o2=ac.createOscillator(),g=ac.createGain(),lp=ac.createBiquadFilter();
+  o.type='triangle';o2.type='sine';o.frequency.setValueAtTime(f*1.01,t);o.frequency.exponentialRampToValueAtTime(f,t+.06);o2.frequency.value=f*2;
+  lp.type='lowpass';lp.frequency.setValueAtTime(5000,t);lp.frequency.exponentialRampToValueAtTime(900,t+1);
+  const g2=ac.createGain();g2.gain.value=.3;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.35,t+.004);g.gain.exponentialRampToValueAtTime(.001,t+1.6);
+  o.connect(lp);o2.connect(g2);g2.connect(lp);lp.connect(g);g.connect(ac.destination);o.start(t);o2.start(t);o.stop(t+1.7);o2.stop(t+1.7)}
+function playIntroMelody(){const ac=bxAC();if(!ac)return;const N={D4:293.7,E4:329.6,G4:392,A4:440,B4:493.9,D5:587.3,E5:659.3};
+  const seq=[['E5',0],['D5',.22],['B4',.44],['A4',.66],['G4',.98],['A4',1.2],['D4',1.5],['E4',1.5],['A4',1.5]];
+  const t0=ac.currentTime+.05;seq.forEach(([n,dt],i)=>pluck(N[n],t0+dt,i>=6?.22:.32))}
+let gIntroT=null;
+function gIntroShow(){
+  G.on=false;clearInterval(G.timer);const it=$('gIntro');
+  $('gPlay').hidden=true;$('gOpts').hidden=true;$('gEnd').classList.remove('show');$('gAgain').hidden=true;
+  $('gTime').textContent=90;$('gBar').style.transform='scaleX(1)';
+  it.classList.add('show');it.classList.remove('play');void it.offsetWidth;it.classList.add('play');
+  playIntroMelody();clearTimeout(gIntroT);gIntroT=setTimeout(gIntroGo,3200);
+}
+function gIntroGo(){clearTimeout(gIntroT);const it=$('gIntro');if(!it.classList.contains('show'))return;it.classList.remove('show','play');gStart()}
+$('gIntro').addEventListener('click',gIntroGo);
+$('sosGame').addEventListener('click',()=>{$('game').classList.add('open');try{closeSos()}catch(e){};try{gIntroShow()}catch(e){toast('错误: '+e.message)}});
 $('gAgain').onclick=gStart;
 $('gClose').onclick=()=>{const done=!G.on;gClose();if(done)toast('过去了吗？连续 '+fStreak()+' 天，继续加油')};
 
@@ -1177,6 +1229,46 @@ $('bxHear').onclick=()=>{if(BX.on)return;sndLegend();const k=[...document.queryS
 $('bxClose').onclick=()=>{const done=!BX.on&&BX.n>0;bxStop(false);$('boxer').classList.remove('open');if(done)toast('过去了吗？连续 '+fStreak()+' 天')};
 $('bxVoice').onclick=()=>{BX.voice=!BX.voice;if(BX.voice)pickVoice();else $('bxVoice').textContent='声音 关';$('bxVoice').setAttribute('aria-pressed',String(BX.voice));if(!BX.voice)try{speechSynthesis.cancel()}catch(e){}};
 
+/* ---- sonido ambiente (sintetizado, sin archivos): lluvia, viento, bosque ---- */
+const AMB={nodes:[],timers:[],master:null,kind:'off',prev:null};
+function ambNoise(ac,brown){const len=ac.sampleRate*4,b=ac.createBuffer(1,len,ac.sampleRate),d=b.getChannelData(0);let last=0;
+  for(let i=0;i<len;i++){const w=Math.random()*2-1;if(brown){last=(last+0.02*w)/1.02;d[i]=last*3.5}else d[i]=w}
+  const s=ac.createBufferSource();s.buffer=b;s.loop=true;return s}
+function ambStop(){
+  AMB.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});AMB.timers=[];
+  const m=AMB.master,nodes=AMB.nodes;AMB.master=null;AMB.nodes=[];AMB.kind='off';
+  if(!m)return;try{const ac=BX.ac;m.gain.cancelScheduledValues(ac.currentTime);m.gain.setValueAtTime(m.gain.value,ac.currentTime);m.gain.linearRampToValueAtTime(0,ac.currentTime+1.2);
+    setTimeout(()=>{nodes.forEach(n=>{try{n.stop&&n.stop()}catch(e){};try{n.disconnect()}catch(e){}})},1400)}catch(e){}
+}
+function ambStart(kind){
+  ambStop();if(!kind||kind==='off')return;const ac=bxAC();if(!ac)return;
+  const m=ac.createGain();m.gain.value=0;m.connect(ac.destination);m.gain.linearRampToValueAtTime(.55,ac.currentTime+2.5);AMB.master=m;AMB.kind=kind;
+  const add=n=>{AMB.nodes.push(n);return n};
+  if(kind==='rain'){
+    const n=add(ambNoise(ac,false)),hp=ac.createBiquadFilter(),lp=ac.createBiquadFilter(),g=ac.createGain();hp.type='highpass';hp.frequency.value=600;lp.type='lowpass';lp.frequency.value=5200;g.gain.value=.16;
+    n.connect(hp);hp.connect(lp);lp.connect(g);g.connect(m);n.start();
+    const b=add(ambNoise(ac,true)),bl=ac.createBiquadFilter(),bg=ac.createGain();bl.type='lowpass';bl.frequency.value=500;bg.gain.value=.35;b.connect(bl);bl.connect(bg);bg.connect(m);b.start();
+    const drop=ambNoise(ac,false);AMB.dropBuf=drop.buffer;
+    AMB.timers.push(setInterval(()=>{if(!AMB.master)return;const t=ac.currentTime+Math.random()*.1;const d=ac.createBufferSource();d.buffer=AMB.dropBuf;const f=ac.createBiquadFilter(),g2=ac.createGain();
+      f.type='bandpass';f.frequency.value=2500+Math.random()*3000;f.Q.value=4;g2.gain.setValueAtTime(.12,t);g2.gain.exponentialRampToValueAtTime(.001,t+.05);d.connect(f);f.connect(g2);g2.connect(m);d.start(t,Math.random()*3);d.stop(t+.06)},90));
+  }else if(kind==='wind'){
+    const n=add(ambNoise(ac,true)),bp=ac.createBiquadFilter(),g=ac.createGain();bp.type='bandpass';bp.frequency.value=420;bp.Q.value=.8;g.gain.value=.8;
+    const l=add(ac.createOscillator()),lg=ac.createGain();l.frequency.value=.07;lg.gain.value=260;l.connect(lg);lg.connect(bp.frequency);
+    const l2=add(ac.createOscillator()),l2g=ac.createGain();l2.frequency.value=.11;l2g.gain.value=.35;l2.connect(l2g);l2g.connect(g.gain);
+    n.connect(bp);bp.connect(g);g.connect(m);n.start();l.start();l2.start();
+  }else{
+    const n=add(ambNoise(ac,true)),lp=ac.createBiquadFilter(),g=ac.createGain();lp.type='lowpass';lp.frequency.value=800;g.gain.value=.55;
+    const l=add(ac.createOscillator()),lg=ac.createGain();l.frequency.value=.05;lg.gain.value=.2;l.connect(lg);lg.connect(g.gain);
+    n.connect(lp);lp.connect(g);g.connect(m);n.start();l.start();
+    const bird=()=>{if(!AMB.master)return;const t0=ac.currentTime+.05,base=2300+Math.random()*1400,reps=2+Math.floor(Math.random()*3);
+      for(let r=0;r<reps;r++){const t=t0+r*.16,o=ac.createOscillator(),bg=ac.createGain();o.type='sine';
+        o.frequency.setValueAtTime(base,t);o.frequency.exponentialRampToValueAtTime(base*1.35,t+.05);o.frequency.exponentialRampToValueAtTime(base*.9,t+.11);
+        bg.gain.setValueAtTime(0,t);bg.gain.linearRampToValueAtTime(.045,t+.01);bg.gain.exponentialRampToValueAtTime(.001,t+.12);o.connect(bg);bg.connect(m);o.start(t);o.stop(t+.13)}
+      AMB.timers.push(setTimeout(bird,3500+Math.random()*6000))};
+    AMB.timers.push(setTimeout(bird,2000));
+  }
+}
+
 /* ---- respiración ---- */
 const PATRONES=[
  {id:'calma',n:'平静 4-6',d:'吸气 4 秒，呼气 6 秒。缓解焦虑。',f:[['吸气',4,1],['呼气',6,0]]},
@@ -1203,9 +1295,12 @@ function bOpts(){
   $('bPat').innerHTML='';PATRONES.forEach(p=>{const b=document.createElement('button');b.textContent=p.n;if(p===bPat)b.className='sel';b.onclick=()=>{if(bRun)return;bPat=p;bOpts()};$('bPat').appendChild(b)});
   $('bDur').innerHTML='';DURS.forEach(m=>{const b=document.createElement('button');b.textContent=m+' 分钟';if(m===bMin)b.className='sel';b.onclick=()=>{if(bRun)return;bMin=m;bOpts()};$('bDur').appendChild(b)});
   $('bDesc').textContent=bPat.d;
+  const SN=[['off','静音'],['rain','雨'],['wind','风'],['forest','森林']];const cur=state.amb||'forest';
+  $('bSnd').innerHTML='';SN.forEach(([k,n])=>{const b=document.createElement('button');b.type='button';b.textContent=n;if(k===cur)b.className='sel';
+    b.onclick=()=>{state.amb=k;save();bOpts();if(bRun)ambStart(k);else if(k!=='off'){ambStart(k);clearTimeout(AMB.prev);AMB.prev=setTimeout(()=>{if(!bRun)ambStop()},3500)}else ambStop()};$('bSnd').appendChild(b)});
 }
 function bStop(done){
-  const was=!!bRun;if(bRun){medCommit();clearTimeout(bRun.t);clearInterval(bRun.i)}bRun=null;renderMed();if(was)render();
+  const was=!!bRun;if(bRun){medCommit();clearTimeout(bRun.t);clearInterval(bRun.i)}bRun=null;renderMed();if(was)render();ambStop();
   const c=$('bCircle');c.style.transition='transform .8s ease';c.style.transform='scale(.45)';
   $('bPhase').textContent=done?'做得好':'准备';$('bCount').textContent='';$('bLeft').textContent='';
   $('bStart').textContent='开始';
@@ -1213,7 +1308,7 @@ function bStop(done){
 }
 function bStart(){
   if(bRun){bStop(false);return}
-  const end=Date.now()+bMin*60000;let idx=0;bRun={st:Date.now()};
+  const end=Date.now()+bMin*60000;let idx=0;bRun={st:Date.now()};clearTimeout(AMB.prev);ambStart(state.amb||'forest');
   $('bStart').textContent='停止';
   const c=$('bCircle');
   const step=()=>{
@@ -1237,6 +1332,7 @@ $('bStart').onclick=bStart;
 
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
+  if($('calm').classList.contains('on')){hideCalm();return}
   if($('game').classList.contains('open')){$('gClose').click();return}
   if($('boxer').classList.contains('open')){$('bxClose').click();return}
   if($('breath').classList.contains('open')){$('bClose').click();return}
@@ -1247,8 +1343,25 @@ document.addEventListener('keydown',e=>{
 function iconsOk(){const i=document.querySelector('i.ph');if(!i)return true;const c=getComputedStyle(i,'::before').content;return c&&c!=='none'&&c!=='normal'&&c!=='""'}
 function iconFallback(){if(iconsOk())return;document.querySelectorAll('i.ph[data-fb]').forEach(i=>{if(!i.textContent)i.textContent=i.dataset.fb})}
 setTimeout(()=>{iconFallback();if(!iconsOk())new MutationObserver(iconFallback).observe(document.body,{childList:true,subtree:true})},2500);
+/* ---- entrada calma: una respiración antes de ver los números ---- */
+let calmT=[];
+function showCalm(){
+  const c=$('calm');if(c.classList.contains('on'))return;calmT.forEach(clearTimeout);calmT=[];
+  $('calmQ').textContent=FRASES[(dayNum()-1)%FRASES.length];
+  c.classList.remove('out');c.classList.add('on');const r=$('calmRing'),ph=$('calmPh');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ph.textContent='深呼吸';calmT.push(setTimeout(hideCalm,2500));return}
+  ph.textContent='吸气';r.style.transform='scale(.5)';
+  calmT.push(setTimeout(()=>{r.style.transform='scale(1)'},60));
+  calmT.push(setTimeout(()=>{ph.textContent='呼气';r.style.transform='scale(.5)'},2800));
+  calmT.push(setTimeout(hideCalm,5600));
+}
+function hideCalm(){const c=$('calm');calmT.forEach(clearTimeout);calmT=[];c.classList.add('out');setTimeout(()=>c.classList.remove('on','out'),700)}
+$('calm').addEventListener('click',hideCalm);
+let hiddenAt=0;
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(hiddenAt&&Date.now()-hiddenAt>10*60000)showCalm()});
 /* ---- init ---- */
-load();checkMedals(false);fCheck(false);ensureMetas(true);render();
+load();checkMedals(false);fCheck(false);ensureMetas(true);render();showCalm();
 (async()=>{try{idb=await openDB();await refreshAudioDays();render()}catch(e){}})();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 let lastDay=todayK();
