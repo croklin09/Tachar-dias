@@ -15,9 +15,10 @@
 <link rel="preload" href="assets/fonts/geist-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap&text=%E3%80%87%E4%B8%80%E4%B8%83%E4%B8%89%E4%B8%8B%E4%B9%88%E4%B9%9D%E4%BA%8C%E4%BA%94%E4%BB%8A%E4%BB%8E%E4%BF%AE%E5%80%BC%E5%81%9C%E5%85%AB%E5%85%AD%E5%86%A5%E5%86%AC%E5%88%86%E5%88%9D%E5%8D%81%E5%8D%85%E5%8D%8A%E5%8F%8C%E5%90%97%E5%9B%9B%E5%A4%84%E5%A4%8F%E5%A4%A7%E5%A4%A9%E5%A7%8B%E5%AD%90%E5%AD%97%E5%AE%9C%E5%AF%92%E5%B0%8F%E5%BB%BF%E5%BC%80%E5%BD%95%E5%BD%B1%E5%BE%97%E5%BF%8C%E6%80%8E%E6%83%8A%E6%83%B3%E6%8B%B3%E6%98%8E%E6%98%A5%E6%9A%91%E6%9C%88%E6%9C%9B%E6%9E%9C%E6%A0%87%E6%A0%B7%E6%AD%A3%E6%B0%B4%E6%B1%89%E6%B8%85%E6%BB%A1%E7%99%BD%E7%99%BE%E7%9B%AE%E7%A7%8B%E7%A7%8D%E7%AB%8B%E7%AC%AC%E7%BB%93%E7%BB%AD%E7%BD%AE%E8%85%8A%E8%87%B3%E8%8A%92%E8%9B%B0%E8%AE%BE%E8%B0%B7%E8%BF%87%E8%BF%91%E8%BF%9E%E9%99%8D%E9%9B%A8%E9%9B%AA%E9%9B%B6%E9%9C%9C%E9%9C%B2%E9%9F%B3" rel="stylesheet">
 <link rel="stylesheet" href="assets/icons/style.css">
 <style>
-  :root{--bg:#0d1310;--card:#131b17;--sunk:#0f1612;--line:#22302a;--ink:#ebe7dc;--ink2:#c9c8bb;--mute:#8e978c;--accent:#7cb58f;--accent2:#c9c8bb;--ok:#7cb58f;--bad:#d4796c;--amber:#d8a650;--moss:#4f8a63;--r-ctl:10px;--r-card:14px;--sans:'Geist','Noto Sans SC',system-ui,sans-serif;--mono:'Geist Mono','Noto Sans SC',ui-monospace,monospace;--serif:var(--sans)}
+  :root{--bg:#0d1310;--card:#131b17;--sunk:#0f1612;--line:#22302a;--ink:#ebe7dc;--ink2:#c9c8bb;--mute:#8e978c;--accent:#7cb58f;--accent2:#c9c8bb;--ok:#7cb58f;--bad:#d4796c;--amber:#d8a650;--seal:#c4473a;--brush:'Ma Shan Zheng','Noto Serif SC','Noto Serif CJK SC',serif;--moss:#4f8a63;--r-ctl:10px;--r-card:14px;--sans:'Geist','Noto Sans SC',system-ui,sans-serif;--mono:'Geist Mono','Noto Sans SC',ui-monospace,monospace;--serif:var(--sans)}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);height:100%;overflow:hidden}
   body{height:100vh;height:100dvh;padding:calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom))}
@@ -225,7 +226,7 @@
   /* ===== Warrior high tech ===== */
   .wrap{position:relative;z-index:1}
   .stats,.cal{position:relative;background:linear-gradient(180deg,#16201b,#121a15)}
-  .stats::before,.stats::after,.cal::before,.cal::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none;border-color:var(--amber);border-style:solid;opacity:.55}
+  .stats::before,.stats::after,.cal::before,.cal::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none;border-color:var(--seal);border-style:solid;opacity:.6}
   .stats::before,.cal::before{top:-1px;left:-1px;border-width:2px 0 0 2px;border-top-left-radius:var(--r-card)}
   .stats::after,.cal::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;border-bottom-right-radius:var(--r-card)}
   .ring .num b,.meta b,#fitN,#medN,.rectxt b,#bCount,#bLeft,#gTime,#gScore,#bxTime,#bxN,.sos .n,.day,.medal,.qday,#qDay,.calhead h2{font-family:var(--mono)}
@@ -244,9 +245,6 @@
   .day.inmeta:not(.fg):not(.fb):not(.future){box-shadow:none}
   .day.inmeta.future{box-shadow:none}
   .day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px rgba(124,181,143,.35)}
-  .medal{border-radius:4px;transform:rotate(45deg);max-width:24px;margin:4px}
-  .medal{font-size:9px}
-  .medal > *{transform:rotate(-45deg)}
   /* mancuerna (CSS puro): abajo a la derecha */
   .day .fit{position:absolute;left:auto;transform:none;right:4px;bottom:5px;width:11px;height:2px;border-radius:1px;background:#ebe7dc;opacity:.95}
   .day .fit::before,.day .fit::after{content:"";position:absolute;top:-2px;width:3px;height:6px;border-radius:1px;background:#ebe7dc}
@@ -315,19 +313,51 @@
   .gintro.play small{opacity:1}
   .seal{position:absolute;top:18%;right:16%;width:44px;height:44px;border-radius:6px;background:#a8433a;color:#f3e6d8;font-family:'Noto Sans SC',var(--sans);font-weight:700;font-size:26px;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg) scale(1.6);opacity:0;transition:opacity .3s ease 1.3s,transform .35s cubic-bezier(.2,1.6,.4,1) 1.3s;box-shadow:inset 0 0 0 2px rgba(243,230,216,.35)}
   .gintro.play .seal{opacity:.92;transform:rotate(-8deg) scale(1)}
-  .day .flag .ph{font-size:12px;color:var(--amber);vertical-align:0}
+  .day .flag .ph{font-size:12px;color:var(--seal);vertical-align:0}
   .day .flag{top:2px;right:3px}
   /* sello de la app: 修 (cultivarse) en verde musgo, con la brasa ámbar */
   header{gap:10px}
   .mark{flex:none;position:relative;width:38px;height:38px;border-radius:var(--r-ctl);display:flex;align-items:center;justify-content:center;
     background:radial-gradient(circle at 50% 40%,#1b2c22,#111915);border:1px solid var(--line);color:var(--accent);
     font-family:'Noto Serif SC','Noto Serif CJK SC','Source Han Serif SC',serif;font-weight:700;font-size:23px;line-height:1}
-  .mark::after{content:"";position:absolute;right:4px;bottom:4px;width:5px;height:5px;border-radius:1px;background:var(--amber)}
+  .mark::after{content:"";position:absolute;right:4px;bottom:4px;width:5px;height:5px;border-radius:1px;background:var(--seal)}
   #title{min-width:0}
   .wrap{gap:12px}
+  /* ===== 水墨 · Tinta china ===== */
+  .ink{position:fixed;left:0;right:0;bottom:0;height:52vh;pointer-events:none;z-index:0;background:url(assets/mountains.png) center bottom/cover no-repeat;opacity:.95}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.07;mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .9 0 0 0 0 .88 0 0 0 0 .8 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .stats,.cal{background:linear-gradient(180deg,rgba(22,32,27,.84),rgba(17,25,21,.78))}
+  #title,.sheet h3,.breath h3,.ghead h3,.sos h2{font-family:var(--brush);font-weight:400;letter-spacing:.02em}
+  #title{font-size:30px}
+  .mark{font-family:var(--brush);font-weight:400;font-size:26px}
+  .ring .num b.cnn{font-family:var(--brush);font-weight:400;letter-spacing:0}
+  /* almanaque + frase vertical */
+  .quote.cn{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:stretch}
+  .alm{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .alm small{font-family:var(--brush);font-size:18px;color:var(--ink);text-transform:none;letter-spacing:.04em;margin:0}
+  .alm .lunar{font-size:13px;color:var(--ink2)}
+  .alm .jq{font-size:12px;color:var(--mute)}
+  .alm .jq b{font-family:var(--brush);font-weight:400;color:var(--accent);font-size:15px;margin-left:4px}
+  .yj{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);margin-top:2px}
+  .yj b{flex:none;width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--brush);font-weight:400;font-size:15px}
+  .yj b.yi{background:#1f3a2a;color:#9fd1ae}
+  .yj b.ji{background:#3a1f1c;color:#e59a8e}
+  .vert{writing-mode:vertical-rl;text-orientation:upright;margin:0;max-height:118px;font-size:15px;line-height:1.55;letter-spacing:.08em;color:var(--ink);
+    border-left:1px solid var(--line);padding-left:10px;font-family:'Noto Serif SC','Noto Serif CJK SC',serif;font-weight:500}
+  /* medallas como sellos 印章 */
+  .medals{gap:5px}
+  .medal{flex:1;max-width:30px;aspect-ratio:1;border-radius:4px;transform:none;margin:0;font-family:var(--brush);font-size:14px;font-weight:400;line-height:1;
+    border:1.5px dashed #3a4a40;background:transparent;color:#4f5d53}
+  .medal.on{border:0;color:#f3e6d8;box-shadow:inset 0 0 0 2px rgba(243,230,216,.25)}
+  .medal span{display:block}
+  .sosbtn{background:#2a1512;border-color:#6a2e26;color:#f08a7a}
+  .day.goal{border-color:var(--seal)}
+  .day .rdot{background:var(--rc)}
 </style>
 </head>
 <body>
+<div class="ink" aria-hidden="true"></div>
 <div class="wrap">
   <h1 class="sr-only">一天一天</h1>
   <header>
@@ -353,7 +383,16 @@
       <div>目标期 <b id="endTxt">-</b></div>
     </div>
     <button type="button" class="btn ghost" id="newMeta" hidden style="grid-column:1/-1;padding:10px">设定新目标</button>
-    <div class="quote"><small id="qDay">第 1 天</small><p id="msg"></p></div>
+    <div class="quote cn">
+      <div class="alm">
+        <small id="qDay">第一天</small>
+        <div class="lunar" id="lunar"></div>
+        <div class="jq" id="jieqi"></div>
+        <div class="yj"><b class="yi">宜</b><span id="yiTxt"></span></div>
+        <div class="yj"><b class="ji">忌</b><span id="jiTxt"></span></div>
+      </div>
+      <p id="msg" class="vert" lang="zh-CN"></p>
+    </div>
     <div class="medals" id="medals"></div>
   </section>
 
@@ -430,7 +469,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 31</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 32</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -556,11 +595,12 @@ const todayK=()=>key(new Date());
 const $=id=>document.getElementById(id);
 const LS='tachar-dias-v1';
 const FRASES=["今天不必赢。不回头就够了。", "痛，也在帮你整理一切。", "想念不是软弱。不发消息才是力量。", "只过这一天。明天是明天的事。", "距离不是惩罚，是回到自己的空间。", "深呼吸。今天的感受不会永远存在。", "快一周了。你的大脑正在学一条新的路。", "不需要全部明白，也可以开始放下。", "每一个“好”都是你守住的承诺。", "十天了。这已经不是冲动，是选择。", "沉默也是一种回答，而且是你的回答。", "别再找信号了。你选择平静，就是信号。", "没有发生的事，也教会了你想要什么。", "今天很难，就做最少的。最少也算数。", "半个月了。回头看看，你已经不是第一天的你。", "别给“好起来”定日期。每天好一点就行。", "动一动身体，脑子会更清楚。今天动一下。", "你的能量有限，放在会回报你的地方。", "想念只是一段回忆经过。让它过去。", "今天建一点东西，哪怕很小。", "三个星期。习惯已经扎根了。", "你不需要别人给你结局。结局由你决定。", "有人真心对你好。今天给其中一个人发消息。", "未来的你会感谢现在的你。", "不是忘记她，是不再等她。", "好日子会突然来。活在当下。", "你的价值不取决于谁选择了你。", "今天做一件只为自己开心的事。", "一个难过的日子，抹不掉二十八个坚定的日子。", "一个月了。曾经觉得不可能的，现在是你的日常。", "噪音变小了，听听你自己想要什么。", "平静不无聊。它是建造一切的地基。", "今天好好睡觉。休息也是前进。", "重要的东西，要一块砖一块砖地建。", "别为了看门还在不在，又去开门。", "安静地种下的，也会长大。", "今天给你的项目一个小时。就一个小时。", "你学会了和自己在一起。这没人能拿走。", "诱惑来了，就看看你的连续天数。", "四十天。你不是在硬撑，你是在前进。", "感恩会改变焦点。写下今天的三件好事。", "一个人不等于空虚。", "你想要的生活，装不下让你痛的东西。", "今天选择你欣赏的那个自己。", "一个半月。开始这件事的你会为你骄傲。", "伤口从里往外愈合。耐心一点。", "不跟别人比。跟第一天的自己比。", "腾出空间：新的东西需要位置。", "自律就是在不想做的时候，记得你想要什么。", "五十天。一半的路走完了，而且是最难的一半。", "出去走走，看看城市，让自己惊喜一下。", "一章不能定义你的整个故事。", "今天照顾你的身体，像照顾你最重要的作品。", "想做事的劲会回来的。总会回来。", "对自己说好话，在心里也一样。", "放开的手，才能拿新的东西。", "每一个坚定的日子，都让地基更深。", "不用等准备好。开始了，就会准备好。", "看看你在不知不觉中走了多远。", "两个月。这已经是你的一部分了。", "今天跟朋友约一下。连接会治愈。", "你的注意力是宝藏，放在你正在建造的东西上。", "不需要别人看见。你自己知道。", "值得的东西，会来到站稳的人身边。", "六十五天。坚定，平静，活在当下。", "记得你为什么开始，再看看你已经走了多远。", "今天试一件从没做过的事。", "忠于自己，是你一生最长的关系。", "你今天的平静，是一天一天赢来的。", "七十天。这已经不是努力，是你的身份。", "重新做大梦吧。现在有空间了。", "爱的能力还是你的。", "为好事做准备：你已经腾出了位置。", "今天认可自己一件事。敢的话，说出来。", "七十五天。再十五天就完成了。", "大事要到最后才看得清。继续走。", "你的未来没有她的名字，只有你的名字。", "你不再从外面找，已经在心里找到的东西。", "每过一天，回头的路就更远一点。", "八十天。看看那个圆环，快满了。", "今天感谢第一天的自己。", "接下来的一切，配得上现在的你。", "坚强地结束。每一天都和第一天一样重要。", "你成了一个说到做到的人。", "还剩五天。享受最后一段路。", "看看你在痛的时候建造了多少。", "目标就在眼前。慢慢走。", "明天是倒数第二天。今天，只要再加一天。", "再一天，这个圆就画完了。", "九十天。你没有失去一个人，你找到了自己。"];
+const SEAL={3:'三',7:'七',10:'十',15:'望',21:'廿',30:'月',45:'半',60:'双',75:'近',90:'满'};
 const MEDALLAS=[
- {d:3,n:'第一步',c:'#a8744a'},{d:7,n:'一周',c:'#a8744a'},{d:10,n:'坚定十天',c:'#a8744a'},
- {d:15,n:'半个月',c:'#9fb0a4'},{d:21,n:'习惯',c:'#9fb0a4'},{d:30,n:'一个月',c:'#9fb0a4'},
- {d:45,n:'一个半月',c:'#d8a650'},{d:60,n:'两个月',c:'#d8a650'},{d:75,n:'最后冲刺',c:'#d8a650'},
- {d:90,n:'自由',c:'#7cb58f'}
+ {d:3,n:'第一步',c:'#b8453a'},{d:7,n:'一周',c:'#b8453a'},{d:10,n:'坚定十天',c:'#b8453a'},
+ {d:15,n:'半个月',c:'#b8453a'},{d:21,n:'习惯',c:'#b8453a'},{d:30,n:'一个月',c:'#b8453a'},
+ {d:45,n:'一个半月',c:'#b8453a'},{d:60,n:'两个月',c:'#b8453a'},{d:75,n:'最后冲刺',c:'#b8453a'},
+ {d:90,n:'自由',c:'#b8453a'}
 ];
 
 
@@ -770,7 +810,7 @@ function renderFoco(){
   const goods=Object.values(f).filter(v=>v==='g').length,bads=Object.values(f).filter(v=>v==='b').length;
   ensureMetas(false);
   const M=curMeta();
-  $('streak').textContent=s;$('totalL').textContent='好率';$('arc').setAttribute('stroke','#7cb58f');
+  {const sb=$('streak');const c=cnNum(s);sb.textContent=c;sb.classList.add('cnn');sb.style.fontSize=(c.length>2?22:c.length>1?28:34)+'px';sb.setAttribute('aria-label',s+' 天连续')}$('totalL').textContent='好率';$('arc').setAttribute('stroke','#7cb58f');
   if(M){
     const X=metaStats(M,tk);const elapsed=X.n-(f[tk]?0:1);const pctNow=elapsed>0?Math.round(X.good/elapsed*100):100;
     const dayIn=daysBetween(M.start,tk)+1;
@@ -783,13 +823,13 @@ function renderFoco(){
     $('total').textContent='-';$('total').style.color='';$('goalTxt').textContent='未设定';$('left').textContent='-';
     $('arc').style.strokeDashoffset=276.5;drawSegs(null);$('newMeta').hidden=false;
   }
-  const q=message(s,g);$('qDay').textContent='第 '+q.n+' 天'+(q.n>90?'':' / 90');$('msg').textContent=f[tk]==='b'?'一个“错”抹不掉你学到的东西。明天，重新开始第一天。':q.t;
+  const q=message(s,g);$('qDay').textContent='第'+cnNum(q.n)+'天';$('qDay').title=q.n+' / 90';try{renderAlmanac()}catch(e){};$('msg').textContent=f[tk]==='b'?'一个“错”抹不掉你学到的东西。明天，重新开始第一天。':q.t;
   const endK=key(fEnd());
   $('endTxt').textContent=M?parse(M.start).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' → '+parse(M.end).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}):'-';
   // medallas foco
   const c=$('medals');c.innerHTML='';
   MEDALLAS.forEach(m=>{const on=state.fMedals.includes(m.d);const b=document.createElement('button');
-    b.className='medal'+(on?' on':'');b.innerHTML='<span>'+m.d+'</span>';if(on)b.style.background=m.c;
+    b.className='medal'+(on?' on':'');b.innerHTML='<span>'+(SEAL[m.d]||m.d)+'</span>';b.setAttribute('aria-label',m.n+' '+m.d+' 天');if(on)b.style.background=m.c;
     b.onclick=()=>toast(on?(m.n+'　'+m.d+' 天 ✓'):(m.n+'　还差 '+Math.max(0,m.d-s)+' 天'));c.appendChild(b)});
   const tr=state.trained.includes(tk);$('fitBtn').classList.toggle('on',tr);$('fitN').textContent=state.trained.length;
   const tb=$('todayBtn');tb.classList.remove('done','fgood','fbad');
@@ -845,7 +885,7 @@ function renderMedals(){
   const c=$('medals');c.innerHTML='';const s=streak();
   MEDALLAS.forEach(m=>{
     const on=state.medals.includes(m.d);const b=document.createElement('button');
-    b.className='medal'+(on?' on':'');b.innerHTML='<span>'+m.d+'</span>';if(on)b.style.background=m.c;
+    b.className='medal'+(on?' on':'');b.innerHTML='<span>'+(SEAL[m.d]||m.d)+'</span>';b.setAttribute('aria-label',m.n+' '+m.d+' 天');if(on)b.style.background=m.c;
     b.onclick=()=>toast(on?(m.n+' · '+m.d+' días ✓'):(m.n+' · faltan '+Math.max(0,m.d-s)+' días'));
     c.appendChild(b);
   });
@@ -952,7 +992,7 @@ function fmtT(s){return Math.floor(s/60)+':'+pad(Math.floor(s%60))}
 async function openDay(k){
   curDay=k;
   $('dayTitle').textContent=fmtLong(k);
-  $('daySub').textContent=k===todayK()?'今天':'';
+  $('daySub').textContent=(k===todayK()?'今天　':'')+'农历 '+lunarStr(parse(k));
   refreshDayToggle();
   await showMemo(k);
   $('daySheet').classList.add('open');
@@ -1383,6 +1423,31 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Da
     }).observe(el,{attributes:true,attributeFilter:['class']});
   });
 })();
+/* ---- 中国历 ---- */
+const CN_D='〇一二三四五六七八九';
+function cnNum(n){n=Math.floor(n);if(n<0)return String(n);if(n<10)return CN_D[n];if(n<100){const t=Math.floor(n/10),u=n%10;return (t===1?'':CN_D[t])+'十'+(u?CN_D[u]:'')}
+  if(n<1000){const h=Math.floor(n/100),r=n%100;return CN_D[h]+'百'+(r===0?'':(r<10?'零'+CN_D[r]:(r<20?'一'+cnNum(r):cnNum(r))))}return String(n)}
+function lunarDay(d){d=+d;if(d===10)return '初十';if(d===20)return '二十';if(d===30)return '三十';if(d<10)return '初'+CN_D[d];if(d<20)return '十'+CN_D[d-10];if(d<30)return '廿'+CN_D[d-20];return String(d)}
+function lunarStr(date){try{const p=new Intl.DateTimeFormat('zh-CN-u-ca-chinese',{year:'numeric',month:'long',day:'numeric'}).formatToParts(date);
+  const y=(p.find(x=>x.type==='yearName')||{}).value||'',m=(p.find(x=>x.type==='month')||{}).value||'',dd=(p.find(x=>x.type==='day')||{}).value||'';
+  return (y?y+'年 ':'')+m+lunarDay(dd)}catch(e){return ''}}
+const JIEQI=['春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至','小寒','大寒','立春','雨水','惊蛰'];
+function sunLon(date){const jd=date.getTime()/864e5+2440587.5,n=jd-2451545,L=280.46+0.9856474*n,g=(357.528+0.9856003*n)*Math.PI/180;
+  return ((L+1.915*Math.sin(g)+0.02*Math.sin(2*g))%360+360)%360}
+function jieqi(date){const d=new Date(date);d.setHours(12,0,0,0);return JIEQI[Math.floor(sunLon(d)/15)]}
+const YI=['冥想','运动','读书','散步','早睡','写字','喝茶','练拳','静坐','学中文','整理','晒太阳'];
+const JI=['熬夜','回头','久坐','刷手机','冲动','拖延','多想'];
+function seeded(k,n){let h=0;for(const c of k)h=(h*31+c.charCodeAt(0))>>>0;const out=[];return (arr,cnt)=>{const a=[...arr],r=[];for(let i=0;i<cnt&&a.length;i++){h=(h*1103515245+12345)>>>0;r.push(a.splice(h%a.length,1)[0])}return r}}
+function renderAlmanac(){
+  const now=new Date(),tk=todayK(),pick=seeded(tk);
+  let yi=pick(YI,3),ji=pick(JI,2);
+  if(!(state.medit&&state.medit[tk]>=600)&&!yi.includes('冥想'))yi[0]='冥想';
+  if(!state.trained.includes(tk)&&!yi.includes('运动'))yi[1]='运动';
+  if(now.getHours()>=22&&!ji.includes('熬夜'))ji[0]='熬夜';
+  $('lunar').textContent='农历 '+lunarStr(now);
+  $('jieqi').innerHTML='节气<b>'+jieqi(now)+'</b>';
+  $('yiTxt').textContent=yi.join('　');$('jiTxt').textContent=ji.join('　');
+}
 /* ---- init ---- */
 load();checkMedals(false);fCheck(false);ensureMetas(true);render();showCalm();
 (async()=>{try{idb=await openDB();await refreshAudioDays();render()}catch(e){}})();
