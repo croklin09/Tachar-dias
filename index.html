@@ -262,12 +262,15 @@
   /* HUD de mantener: grabación + selector de reacción */
   .hold{position:fixed;z-index:70;display:none;flex-direction:column;align-items:center;gap:8px;pointer-events:none;transform:translate(-50%,-100%)}
   .hold.on{display:flex}
-  .hold .strip{display:flex;gap:2px;padding:6px;background:#1a1e21;border:1px solid var(--line);border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-  .hold .strip span{font-size:24px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .12s ease,background-color .12s ease}
-  .hold .strip span.hit{transform:scale(1.35) translateY(-6px);background:#23302a}
+  .hold .strip{display:none;grid-template-columns:repeat(5,44px);gap:4px;padding:8px;background:#1a1e21;border:1px solid var(--line);border-radius:var(--r-card);box-shadow:0 12px 32px rgba(0,0,0,.55)}
+  .hold.pick .strip{display:grid}
+  .hold .strip span{font-size:24px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:transform .12s ease,background-color .12s ease}
+  .hold .strip span.hit{transform:scale(1.3);background:#23302a;box-shadow:inset 0 0 0 1px var(--accent)}
   .hold .rec{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#2a1717;border:1px solid #5a2a2a;border-radius:999px;color:#ffb3a7;font-size:13px;font-family:var(--mono);white-space:nowrap}
   .hold .rec i{width:8px;height:8px;border-radius:50%;background:var(--bad);animation:blink 1s steps(2,start) infinite}
   .hold.pick .rec{display:none}
+  .hold .hint{display:none;font-size:12px;color:var(--mute)}
+  .hold.pick .hint{display:block}
   @keyframes blink{to{visibility:hidden}}
 </style>
 </head>
@@ -372,7 +375,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 23</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 24</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -474,7 +477,7 @@
   </div>
 </div>
 
-<div class="hold" id="hold" aria-hidden="true"><div class="strip" id="holdStrip"></div><div class="rec"><i></i><span id="holdTxt">0:00</span></div></div>
+<div class="hold" id="hold" aria-hidden="true"><div class="hint">松开选择</div><div class="strip" id="holdStrip"></div><div class="rec"><i></i><span id="holdTxt">0:00</span></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -795,8 +798,13 @@ const HOLD={k:null,rec:null,chunks:[],stream:null,st:0,timer:null,mode:null,hit:
 function holdShow(x,y){
   const h=$('hold'),strip=$('holdStrip');
   if(!strip.children.length)EMOJIS.forEach(em=>{const sp=document.createElement('span');sp.textContent=em;sp.dataset.e=em;strip.appendChild(sp)});
-  const w=Math.min(innerWidth-16,EMOJIS.length*40+14);const cx=Math.max(w/2+8,Math.min(innerWidth-w/2-8,x));
-  h.style.left=cx+'px';h.style.top=Math.max(110,y-24)+'px';h.classList.add('on');h.classList.remove('pick');
+  h.classList.remove('pick');h.style.top=Math.max(80,y-40)+'px';h.classList.add('on');
+  const hw=h.offsetWidth/2+10;h.style.left=Math.max(hw,Math.min(innerWidth-hw,x))+'px';
+}
+function holdPick(x,y){
+  const h=$('hold');h.classList.add('pick');
+  const w=5*44+4*4+16;const cx=Math.max(w/2+8,Math.min(innerWidth-w/2-8,x));
+  h.style.left=cx+'px';h.style.top=Math.max(150,y-36)+'px';
 }
 function holdHide(){$('hold').classList.remove('on','pick');[...$('holdStrip').children].forEach(c=>c.classList.remove('hit'))}
 async function holdRecStart(k){
@@ -832,9 +840,12 @@ function bindDay(e,k){
   e.addEventListener('pointermove',ev=>{
     if(t&&(Math.abs(ev.clientX-sx)>12||Math.abs(ev.clientY-sy)>12)){reset();return}
     if(!fired||HOLD.k!==k)return;
-    if(HOLD.mode==='rec'&&(Math.abs(ev.clientX-sx)>18||Math.abs(ev.clientY-sy)>18)){HOLD.mode='pick';holdRecStop(false);$('hold').classList.add('pick');try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}
+    if(HOLD.mode==='rec'&&(Math.abs(ev.clientX-sx)>18||Math.abs(ev.clientY-sy)>18)){HOLD.mode='pick';holdRecStop(false);holdPick(sx,sy);try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}}
     if(HOLD.mode==='pick'){
-      let hit=null;[...$('holdStrip').children].forEach(c=>{const r=c.getBoundingClientRect();const on=ev.clientX>=r.left-2&&ev.clientX<=r.right+2;c.classList.toggle('hit',on);if(on)hit=c.dataset.e});
+      let hit=null,best=1e9,bestEl=null;const kids=[...$('holdStrip').children];
+      kids.forEach(c=>{const r=c.getBoundingClientRect();const dx=ev.clientX-(r.left+r.width/2),dy=ev.clientY-(r.top+r.height/2);const d=dx*dx+dy*dy;if(d<best){best=d;bestEl=c}});
+      if(bestEl&&best<46*46){hit=bestEl.dataset.e}else bestEl=null;
+      kids.forEach(c=>c.classList.toggle('hit',c===bestEl));
       if(hit&&hit!==HOLD.hit){try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}}HOLD.hit=hit;
     }
   });

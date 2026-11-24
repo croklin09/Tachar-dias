@@ -1,4 +1,4 @@
-const CACHE = 'tachar-dias-v23';
+const CACHE = 'tachar-dias-v24';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-192-maskable.png', 'icon-512-maskable.png'];
 
 self.addEventListener('install', e => {
