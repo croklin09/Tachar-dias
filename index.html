@@ -208,6 +208,11 @@
   .bxnames{color:var(--ink2);font-size:16px;margin-top:12px;min-height:22px}
   .bxkey{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;color:var(--mute);text-align:center;margin-bottom:10px}
   .bxkey b{display:block;color:var(--ink);font-size:15px}
+  .mrow{display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .mrow:last-child{border-bottom:0}
+  .mrow span{color:var(--mute);font-variant-numeric:tabular-nums}
+  .day.inmeta:not(.fg):not(.fb):not(.future){box-shadow:inset 0 0 0 1px #2c4a3b}
+  .day.inmeta.future{box-shadow:inset 0 0 0 1px #22352c}
 </style>
 </head>
 <body>
@@ -228,8 +233,8 @@
       <div class="num"><b id="streak">0</b><span>连续</span></div>
     </div>
     <div class="meta">
-      <div><span id="totalL">好 / 错</span> <b id="total">0</b></div>
-      <div>目标 <b id="goalTxt">90 天</b></div>
+      <div><span id="totalL">好率</span> <b id="total">0%</b></div>
+      <div>目标 <b id="goalTxt">-</b></div>
       <div>还剩 <b id="left">90</b></div>
       <div>终点 <b id="endTxt">-</b></div>
     </div>
@@ -283,8 +288,14 @@
     <label for="startIn">开始日期</label>
     <input type="date" id="startIn">
     <label for="goalIn">目标（天）</label>
+    <p class="note" style="margin:-2px 0 6px">当前目标固定不变。新的天数从下一个目标开始。</p>
     <input type="number" id="goalIn" min="1" max="999" inputmode="numeric">
     <div class="row"><button id="closeSet">取消</button><button class="primary" id="saveSet">保存</button></div>
+    <div class="memo" style="margin-top:14px">
+      <h4>目标记录</h4>
+      <div id="metaHist"></div>
+      <p class="note" style="margin:8px 0 0">成功 100%　差一点 70-99%　未完成 70% 以下</p>
+    </div>
     <div class="memo reasons" style="margin-top:14px">
       <h4>我的理由</h4>
       <p class="note" style="margin:0 0 10px">最多 5 个坚持下去的理由。会显示在 SOS 里。</p>
@@ -303,7 +314,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 18</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 19</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -424,7 +435,7 @@ const MEDALLAS=[
 ];
 
 
-let state={title:'一天一天',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{},medit:{},reasons:[],mode:'dist',foco:{},fMedals:[]};
+let state={title:'一天一天',start:todayK(),goal:90,goalSet:false,marked:[],medals:[],trained:[],moods:{},medit:{},reasons:[],mode:'dist',foco:{},fMedals:[],metas:[]};
 let audioDays=new Set();
 let view=new Date(); view.setDate(1);
 let lastAnim=null, curDay=null;
@@ -440,6 +451,7 @@ function merge(o){
   if(o.mode==='foco'||o.mode==='dist')state.mode=o.mode;
   if(o.foco&&typeof o.foco==='object')state.foco=Object.fromEntries(Object.entries(o.foco).filter(([k,v])=>v==='g'||v==='b'));
   if(Array.isArray(o.fMedals))state.fMedals=o.fMedals.filter(n=>typeof n==='number');
+  if(Array.isArray(o.metas))state.metas=o.metas.filter(m=>m&&typeof m.start==='string'&&typeof m.end==='string');
   if(typeof o.gameBest==='number')state.gameBest=o.gameBest;
   if(Array.isArray(o.reasons))state.reasons=o.reasons.filter(x=>typeof x==='string').slice(0,5);
   if(o.medit&&typeof o.medit==='object')state.medit=Object.fromEntries(Object.entries(o.medit).filter(([k,v])=>typeof v==='number'));
@@ -497,7 +509,47 @@ function fBest(){
   for(const k of a){if(prev){const p=parse(prev);p.setDate(p.getDate()+1);run=(key(p)===k)?run+1:1}else run=1;best=Math.max(best,run);prev=k}
   return best;
 }
-function fEnd(){const d=new Date();const s=fStreak();const st=new Date();
+/* ---- Metas fijas: una vez creada, inicio y fin no se mueven ---- */
+const addDays=(k,n)=>{const d=parse(k);d.setDate(d.getDate()+n);return key(d)};
+const daysBetween=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+function metaGrade(p){return p>=100?{t:'成功',c:'#5fbf8f'}:p>=70?{t:'差一点',c:'#e5c158'}:{t:'未完成',c:'#e0716a'}}
+function metaStats(m,uptoK){
+  const last=uptoK<m.end?uptoK:m.end;let good=0,bad=0,n=0;
+  for(let k=m.start;k<=last;k=addDays(k,1)){n++;if(state.foco[k]==='g')good++;else if(state.foco[k]==='b')bad++}
+  return {good,bad,n,len:daysBetween(m.start,m.end)+1};
+}
+function curMeta(){return state.metas.find(m=>!m.result)||null}
+function ensureMetas(celebrate){
+  const tk=todayK();let changed=false,last=null;
+  if(!state.metas.length){
+    const g=Math.max(1,state.goal|0);let st=state.start&&state.start<=tk&&daysBetween(state.start,tk)<g?state.start:tk;
+    state.metas.push({start:st,end:addDays(st,g-1),len:g});changed=true;
+  }
+  let guard=0;
+  while(guard++<400){
+    const m=curMeta();
+    if(!m){const prev=state.metas[state.metas.length-1];const st=addDays(prev.end,1);const g=Math.max(1,state.goal|0);state.metas.push({start:st,end:addDays(st,g-1),len:g});changed=true;continue}
+    if(m.end<tk){const x=metaStats(m,m.end);m.pct=Math.round(x.good/x.len*100);m.result=metaGrade(m.pct).t;last=m;changed=true;continue}
+    break;
+  }
+  if(changed)save();
+  if(last&&celebrate)showMetaResult(last);
+}
+function showMetaResult(m){
+  const g=metaGrade(m.pct);
+  $('mBig').textContent=m.pct+'%';$('mBig').style.background=g.c;$('mBig').style.fontSize='30px';
+  $('mName').textContent='目标结果：'+g.t;
+  $('mSub').textContent=parse(m.start).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})+' 到 '+parse(m.end).toLocaleDateString('zh-CN',{month:'short',day:'numeric'})+'，'+m.len+' 天。新目标已经开始。';
+  $('medalSheet').classList.add('open');
+}
+function renderMetaHistory(){
+  const box=$('metaHist');if(!box)return;box.innerHTML='';
+  const done=state.metas.filter(m=>m.result).slice(-8).reverse();
+  if(!done.length){box.innerHTML='<p class="note" style="margin:0">还没有完成的目标。</p>';return}
+  done.forEach(m=>{const g=metaGrade(m.pct);const d=document.createElement('div');d.className='mrow';
+    d.innerHTML='<span>'+parse(m.start).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' - '+parse(m.end).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+'</span><b style="color:'+g.c+'">'+g.t+' '+m.pct+'%</b>';box.appendChild(d)});
+}
+function fEnd(){const m=curMeta();if(m)return parse(m.end);const d=new Date();const s=fStreak();const st=new Date();
   if(state.foco[key(d)]!=='g')st.setDate(st.getDate()-1);
   st.setDate(st.getDate()-s+1);if(s===0){st.setTime(d.getTime());if(state.foco[key(d)]==='b')st.setDate(st.getDate()+1)}
   st.setDate(st.getDate()+state.goal-1);return st}
@@ -546,6 +598,7 @@ function render(){
     if(k===tk)e.classList.add('today');
     if(k===state.start)e.classList.add('start');
     if(k===endK){e.classList.add('goal');e.insertAdjacentHTML('beforeend','<span class="flag">🏁</span>')}
+    if(k>=M.start&&k<=M.end)e.classList.add('inmeta');
     if(audioDays.has(k))e.insertAdjacentHTML('beforeend','<span class="mic"></span>');
     if(state.moods[k])e.insertAdjacentHTML('beforeend','<span class="emo">'+state.moods[k]+'</span>');
     if(state.trained.includes(k))e.insertAdjacentHTML('beforeend','<span class="fit"></span>');
@@ -560,9 +613,14 @@ function renderFoco(){
   $('title').value=state.title;renderMed();
   const s=fStreak(),g=state.goal,f=state.foco,tk=todayK();
   const goods=Object.values(f).filter(v=>v==='g').length,bads=Object.values(f).filter(v=>v==='b').length;
-  $('streak').textContent=s;$('totalL').textContent='好 / 错';$('total').textContent=goods+' / '+bads;
-  $('goalTxt').textContent=g+' 天';$('left').textContent=Math.max(0,g-s);
-  $('arc').setAttribute('stroke','#5fbf8f');$('arc').style.strokeDashoffset=276.5*(1-Math.min(1,s/g));
+  ensureMetas(false);
+  const M=curMeta(),X=metaStats(M,tk);
+  const elapsed=X.n-(f[tk]?0:1);const pctNow=elapsed>0?Math.round(X.good/elapsed*100):100;
+  const dayIn=daysBetween(M.start,tk)+1;
+  $('streak').textContent=s;$('totalL').textContent='好率';$('total').textContent=(elapsed>0?pctNow:'-')+(elapsed>0?'%':'');
+  $('total').style.color=elapsed>0?metaGrade(pctNow).c:'';
+  $('goalTxt').textContent='第 '+dayIn+' / '+M.len+' 天';$('left').textContent=Math.max(0,X.len-dayIn)+' 天';
+  $('arc').setAttribute('stroke','#5fbf8f');$('arc').style.strokeDashoffset=276.5*(1-Math.min(1,X.good/X.len));
   const q=message(s,g);$('qDay').textContent='第 '+q.n+' 天'+(q.n>90?'':' / 90');$('msg').textContent=f[tk]==='b'?'一个“错”抹不掉你学到的东西。明天，重新开始第一天。':q.t;
   const endK=key(fEnd());
   $('endTxt').textContent=parse(endK).toLocaleDateString('zh-CN',{month:'short',day:'numeric',weekday:'short'});
@@ -608,7 +666,7 @@ function checkMedals(celebrate){
   if(nuevas.length){save();if(celebrate)showMedal(nuevas[nuevas.length-1])}
 }
 function showMedal(m,foco){
-  $('mBig').textContent=m.d;$('mBig').style.background=m.c;
+  $('mBig').textContent=m.d;$('mBig').style.background=m.c;$('mBig').style.fontSize='';
   $('mName').textContent='奖牌：'+m.n;
   const nx=MEDALLAS.find(x=>x.d>m.d);
   $('mSub').textContent='连续 '+m.d+' 天。'+(nx?'下一个：'+nx.d+' 天。':'你走完了全程。');
@@ -726,10 +784,10 @@ $('jumpEnd').onclick=()=>{const e=fEnd();view=new Date(e.getFullYear(),e.getMont
 $('prev').onclick=()=>{view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=()=>{view.setMonth(view.getMonth()+1);render()};
 $('title').onchange=e=>{state.title=e.target.value.trim()||'一天一天';save();render()};
-$('openSet').onclick=()=>{renderSosSettings();for(let i=0;i<5;i++)$('r'+i).value=state.reasons[i]||'';$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='清除所有记录';$('setSheet').classList.add('open')};
+$('openSet').onclick=()=>{renderMetaHistory();renderSosSettings();for(let i=0;i<5;i++)$('r'+i).value=state.reasons[i]||'';$('startIn').value=state.start;$('goalIn').value=state.goal;$('resetBtn').dataset.c='';$('resetBtn').textContent='清除所有记录';$('setSheet').classList.add('open')};
 $('closeSet').onclick=()=>{sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')};
 $('setSheet').onclick=e=>{if(e.target.id==='setSheet'){sosStop();$('sosPlayer').pause();$('setSheet').classList.remove('open')}};
-$('saveSet').onclick=()=>{state.reasons=[0,1,2,3,4].map(i=>$('r'+i).value.trim()).filter(Boolean);if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0){state.goal=g;state.goalSet=true}save();render();$('setSheet').classList.remove('open')};
+$('saveSet').onclick=()=>{state.reasons=[0,1,2,3,4].map(i=>$('r'+i).value.trim()).filter(Boolean);if($('startIn').value)state.start=$('startIn').value;const g=parseInt($('goalIn').value,10);if(g>0&&g!==state.goal){state.goal=g;state.goalSet=true;toast('新的天数从下一个目标开始')}save();render();$('setSheet').classList.remove('open')};
 $('resetBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='再点一下确认';return}state.marked=[];state.foco={};save();render();$('setSheet').classList.remove('open')};
 $('exportBtn').onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
@@ -987,12 +1045,12 @@ function iconsOk(){const i=document.querySelector('i.ph');if(!i)return true;cons
 function iconFallback(){if(iconsOk())return;document.querySelectorAll('i.ph[data-fb]').forEach(i=>{if(!i.textContent)i.textContent=i.dataset.fb})}
 setTimeout(()=>{iconFallback();if(!iconsOk())new MutationObserver(iconFallback).observe(document.body,{childList:true,subtree:true})},2500);
 /* ---- init ---- */
-load();checkMedals(false);fCheck(false);render();
+load();checkMedals(false);fCheck(false);ensureMetas(true);render();
 (async()=>{try{idb=await openDB();(await memoKeys()||[]).forEach(k=>{if(!String(k).startsWith('__'))audioDays.add(k)});render()}catch(e){}})();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 let lastDay=todayK();
-setInterval(()=>{if(todayK()!==lastDay){lastDay=todayK();render()}},60000);
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&bRun&&bRun.st){medCommit();bRun.st=Date.now()}if(!document.hidden&&todayK()!==lastDay){lastDay=todayK();render()}});
+setInterval(()=>{if(todayK()!==lastDay){lastDay=todayK();ensureMetas(true);render()}},60000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&bRun&&bRun.st){medCommit();bRun.st=Date.now()}if(!document.hidden&&todayK()!==lastDay){lastDay=todayK();ensureMetas(true);render()}});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{}));
 </script>
 </body>
