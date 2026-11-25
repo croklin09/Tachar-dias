@@ -1,4 +1,4 @@
-const CACHE = 'tachar-dias-v32';
+const CACHE = 'tachar-dias-v33';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'assets/fonts/fonts.css', 'assets/fonts/geist-latin-400-normal.woff2', 'assets/fonts/geist-latin-500-normal.woff2', 'assets/fonts/geist-latin-600-normal.woff2', 'assets/fonts/geist-latin-700-normal.woff2', 'assets/fonts/geist-mono-latin-400-normal.woff2', 'assets/fonts/geist-mono-latin-500-normal.woff2', 'assets/fonts/geist-mono-latin-600-normal.woff2', 'assets/icons/style.css', 'assets/icons/Phosphor.woff2', 'assets/mountains.png', 'icon-192.png', 'apple-touch-icon.png', 'icon-512.png', 'icon-192-maskable.png', 'icon-512-maskable.png'];
 
 self.addEventListener('install', e => {
