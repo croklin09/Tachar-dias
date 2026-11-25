@@ -355,23 +355,21 @@
   .day.goal{border-color:var(--seal)}
   .day .rdot{background:var(--rc)}
   /* 趣 */
-  .qu{flex:none;display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;background:linear-gradient(180deg,#1a1912,#141710);border:1px solid #33301f;border-radius:var(--r-card);padding:8px 8px 8px 9px}
-  .qucard{display:flex;gap:10px;align-items:center;min-width:0;background:none;border:0;color:var(--ink);text-align:left;padding:0;font:inherit;cursor:pointer;touch-action:manipulation}
+  #quoteBox{position:relative;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  #quoteBox:focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:6px}
+  .quv{position:absolute;inset:8px 0 0 0;z-index:2;display:none;flex-direction:column;gap:10px;background:none;padding:2px 0 0}
+  #quoteBox.qon .quv{display:flex}
+  #quoteBox.qon .alm,#quoteBox.qon #msg{visibility:hidden}
+  .quhd{display:flex;align-items:center;gap:10px}
+  .quhd small{margin:0!important;color:var(--amber)!important}
+  .quback{margin-left:auto;font-size:12px;color:var(--mute)}
   .qus{flex:none;width:32px;height:32px;border-radius:7px;background:var(--amber);color:#1c1406;font-family:var(--brush);font-size:21px;display:grid;place-items:center;line-height:1}
-  .qut{min-width:0;display:flex;flex-direction:column;gap:2px}
-  .qut b{font-weight:500;font-size:14px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-wrap:pretty}
-  .qut small{display:none;font-size:12px;color:var(--ink2);line-height:1.3}
-  .qu.es .qut small{display:block}
-  .qurr{width:34px;height:34px;border-radius:var(--r-ctl);border:1px solid #33301f;background:none;color:var(--ink2);display:grid;place-items:center;cursor:pointer;font-size:17px;touch-action:manipulation}
-  .qurr[hidden]{display:none}
-  .quside{display:flex;flex-direction:column;align-items:stretch;gap:5px}
-  .qudots{display:flex;gap:5px;justify-content:center;align-items:center;font-family:var(--mono);font-size:10px;color:var(--amber);height:9px}
-  .qudots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--amber);display:block;opacity:.7}
-  .qudots i.on{background:var(--amber);opacity:1}
-  .qudo{padding:7px 12px;border-radius:var(--r-ctl);border:1px solid #5a4a26;background:#2a2312;color:var(--amber);font:inherit;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;touch-action:manipulation}
-  .qudo.done{background:none;border-color:#33301f;color:var(--ink2);font-weight:500}
-  .qudo:focus-visible,.qurr:focus-visible,.qucard:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-  @media (prefers-reduced-motion:no-preference){.qudots.pop i.on{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}}
+  .quv p{font-size:19px;font-weight:500;line-height:1.45;margin:0;color:var(--ink);text-wrap:pretty}
+  .qudo{align-self:flex-start;margin-top:auto;padding:9px 16px;border-radius:var(--r-ctl);border:1px solid #5a4a26;background:#2a2312;color:var(--amber);font:inherit;font-size:15px;font-weight:600;cursor:pointer;touch-action:manipulation}
+  .qudo.done{background:var(--amber);color:#1c1406;border-color:var(--amber)}
+  .qudo:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .qchip{font-size:11px;font-weight:600;color:var(--amber);border:1px solid #5a4a26;border-radius:5px;padding:1px 6px;letter-spacing:0;text-transform:none}
+  .qchip.on{background:var(--amber);color:#1c1406;border-color:var(--amber)}
   .day .qd{position:absolute;bottom:2px;left:50%;width:4px;height:4px;margin-left:-2px;background:var(--amber);transform:rotate(45deg);pointer-events:none}
   @media (max-height:700px){.qus{width:28px;height:28px;font-size:18px}.qut b{font-size:13px}}
 </style>
@@ -403,9 +401,14 @@
       <div>目标期 <b id="endTxt">-</b></div>
     </div>
     <button type="button" class="btn ghost" id="newMeta" hidden style="grid-column:1/-1;padding:10px">设定新目标</button>
-    <div class="quote cn">
+    <div class="quote cn" id="quoteBox" role="button" tabindex="0" aria-label="切换：今日签 / 今日趣">
+      <div class="quv" id="quView" aria-live="polite">
+        <div class="quhd"><span class="qus" id="quCat" aria-hidden="true">趣</span><small>今日趣</small><span class="quback">签 ↺</span></div>
+        <p id="quZh" lang="zh-CN"></p>
+        <button type="button" class="qudo" id="quDo">做了</button>
+      </div>
       <div class="alm">
-        <small id="qDay">第一天</small>
+        <small id="qDay" style="display:flex;align-items:center;gap:8px">第一天</small>
         <div class="lunar" id="lunar"></div>
         <div class="jq" id="jieqi"></div>
         <div class="yj"><b class="yi">宜</b><span id="yiTxt"></span></div>
@@ -421,12 +424,6 @@
     <button class="btn ghost fit" id="fitBtn" aria-label="今天运动了"><i class="kb" aria-hidden="true"></i> <span id="fitN">0</span></button>
     <button class="btn ghost" id="todayMemo" aria-label="今天的录音"><i class="ph ph-microphone" data-fb="🎙" aria-hidden="true"></i></button>
     <button class="btn ghost fit" id="openBreath" aria-label="冥想"><i class="ph ph-flower-lotus" data-fb="🧘" aria-hidden="true"></i> <span id="medN">10</span></button>
-  </div>
-
-  <div class="qu" id="quBar">
-    <button type="button" class="qucard" id="quCard" aria-label="今天的趣（点按看西班牙语）"><span class="qus" id="quCat" aria-hidden="true">趣</span><span class="qut"><b id="quZh" lang="zh-CN"></b><small id="quEs" lang="es"></small></span></button>
-    <button type="button" class="qurr" id="quRr" aria-label="换一张"><i class="ph ph-shuffle" data-fb="↻" aria-hidden="true"></i></button>
-    <div class="quside"><div class="qudots" id="quDots" role="img"></div><button type="button" class="qudo" id="quDo">做了</button></div>
   </div>
 
   <section class="cal">
@@ -496,7 +493,7 @@
     <div class="row"><button id="exportBtn">导出备份</button><button id="importBtn">导入</button></div>
     <input type="file" id="importIn" accept="application/json" hidden>
     <div class="row"><button class="danger" id="resetBtn">清除所有记录</button></div>
-    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 33</p>
+    <p class="note" style="text-align:center;margin-top:14px" translate="no">版本 34</p>
   </div>
 </div>
 <div class="sheet" id="emoSheet" role="dialog" aria-modal="true" aria-labelledby="emoTitle">
@@ -835,7 +832,7 @@ function render(){
 }
 function renderFoco(){
 
-  $('title').value=state.title;renderMed();try{renderQu()}catch(e){}
+  $('title').value=state.title;renderMed();
   const s=fStreak(),g=state.goal,f=state.foco,tk=todayK();
   const goods=Object.values(f).filter(v=>v==='g').length,bads=Object.values(f).filter(v=>v==='b').length;
   ensureMetas(false);
@@ -853,7 +850,7 @@ function renderFoco(){
     $('total').textContent='-';$('total').style.color='';$('goalTxt').textContent='未设定';$('left').textContent='-';
     $('arc').style.strokeDashoffset=276.5;drawSegs(null);$('newMeta').hidden=false;
   }
-  const q=message(s,g);$('qDay').textContent='第'+cnNum(q.n)+'天';$('qDay').title=q.n+' / 90';try{renderAlmanac()}catch(e){};$('msg').textContent=f[tk]==='b'?'一个“错”抹不掉你学到的东西。明天，重新开始第一天。':q.t;
+  const q=message(s,g);$('qDay').textContent='第'+cnNum(q.n)+'天';$('qDay').title=q.n+' / 90';try{renderAlmanac()}catch(e){};try{renderQu()}catch(e){};$('msg').textContent=f[tk]==='b'?'一个“错”抹不掉你学到的东西。明天，重新开始第一天。':q.t;
   const endK=key(fEnd());
   $('endTxt').textContent=M?parse(M.start).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'})+' → '+parse(M.end).toLocaleDateString('zh-CN',{month:'numeric',day:'numeric'}):'-';
   // medallas foco
@@ -1534,37 +1531,24 @@ const QU=[
 ['身','出门走二十分钟，没有目的','Salí a caminar 20 minutos sin destino'],
 ['身','听一首歌，什么都不做','Escuchá una canción sin hacer nada más']
 ];
-const QU_GOAL=3;
 function quHash(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;return h}
-function quWeekStart(k){const d=parse(k);d.setDate(d.getDate()-((d.getDay()+6)%7));return key(d)}
-function quWeek(k){const s=quWeekStart(k);let n=0;for(let i=0;i<7;i++){const d=parse(s);d.setDate(d.getDate()+i);n+=(state.qu[key(d)]||[]).length}return n}
-function quToday(){const tk=todayK();let c=state.quCard;
-  if(!c||c.d!==tk||!QU[c.i]){c=state.quCard={d:tk,i:quHash(tk)%QU.length,rr:0};save()}return c}
-function quNext(c){const used=new Set(state.qu[c.d]||[]);let i=c.i;
-  for(let t=0;t<QU.length*2;t++){i=(i+7+(quHash(c.d+t)%5))%QU.length;if(!used.has(i)&&i!==c.i)break}c.i=i}
-let quEs=false;
+function quIdx(k){return quHash(k)%QU.length}
+let quOn=false;
 function renderQu(){
-  const tk=todayK(),c=quToday(),card=QU[c.i],L=state.qu[tk]||[],done=L.includes(c.i),n=quWeek(tk);
-  $('quCat').textContent=card[0];$('quZh').textContent=card[1];$('quEs').textContent=card[2];
-  $('quBar').classList.toggle('es',quEs);
-  const d=$('quDots');d.innerHTML=Array.from({length:QU_GOAL},(_,i)=>'<i class="'+(i<n?'on':'')+'"></i>').join('')+(n>QU_GOAL?'<span>+'+(n-QU_GOAL)+'</span>':'');
-  d.setAttribute('aria-label','本周 '+n+' / '+QU_GOAL);
-  $('quDo').textContent=done?'再来一张':'做了';$('quDo').classList.toggle('done',done);
-  $('quRr').hidden=done||c.rr>=1;
+  const tk=todayK(),i=quIdx(tk),card=QU[i],done=(state.qu[tk]||[]).length>0;
+  $('quCat').textContent=card[0];$('quZh').textContent=card[1];
+  $('quDo').textContent=done?'做了 ✓':'做了';$('quDo').classList.toggle('done',done);$('quDo').setAttribute('aria-pressed',done);
+  $('quoteBox').classList.toggle('qon',quOn);
+  const q=$('qDay');let ch=q.querySelector('.qchip');if(!ch){ch=document.createElement('span');ch.className='qchip';ch.setAttribute('aria-hidden','true');q.appendChild(ch)}
+  ch.textContent=done?'趣 ✓':'趣';ch.classList.toggle('on',done);
 }
-$('quCard').onclick=()=>{quEs=!quEs;renderQu()};
-$('quRr').onclick=()=>{const c=quToday();if(c.rr>=1)return;quNext(c);c.rr++;save();renderQu()};
-$('quDo').onclick=()=>{
-  const tk=todayK(),c=quToday(),L=state.qu[tk]||(state.qu[tk]=[]);
-  if(L.includes(c.i)){quNext(c);save();renderQu();return}
-  const before=quWeek(tk);L.push(c.i);save();render();
-  const after=quWeek(tk),wk=quWeekStart(tk);
-  if(before<QU_GOAL&&after>=QU_GOAL&&!state.quWeeks.includes(wk)){state.quWeeks.push(wk);save();
-    toast('本周三趣 ✓ 第'+cnNum(state.quWeeks.length)+'周');
-    try{const ac=bxAC();if(ac){const t=ac.currentTime+.02;[523.25,659.25,783.99].forEach((f,i)=>pluck(f,t+i*.12,.3))}}catch(e){}
-  }else toast(['好玩','活着真好','又一个','不错'][after%4]+' · '+Math.min(after,QU_GOAL)+'/'+QU_GOAL);
-  const dd=$('quDots');dd.classList.remove('pop');void dd.offsetWidth;dd.classList.add('pop');
-};
+function quToggle(){quOn=!quOn;renderQu()}
+$('quoteBox').onclick=e=>{if(e.target.closest('#quDo'))return;quToggle()};
+$('quoteBox').onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&e.target===$('quoteBox')){e.preventDefault();quToggle()}};
+$('quDo').onclick=e=>{e.stopPropagation();const tk=todayK();
+  if((state.qu[tk]||[]).length){delete state.qu[tk];save();render();return}
+  state.qu[tk]=[quIdx(tk)];save();render();toast(['好玩','活着真好','不错','今天有趣'][quHash(tk+'t')%4]);
+  try{const ac=bxAC();if(ac){const t=ac.currentTime+.02;[587.33,739.99].forEach((f,j)=>pluck(f,t+j*.1,.25))}}catch(err){}};
 </script>
 </body>
 </html>
